@@ -21,7 +21,7 @@ class _FlashScreenState extends State<FlashScreen> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
 
-    await Future.delayed(const Duration(seconds: 2)); // splash delay
+    await Future.delayed(const Duration(seconds: 2)); 
 
     if (token != null && token.isNotEmpty) {
       Navigator.pushReplacement(

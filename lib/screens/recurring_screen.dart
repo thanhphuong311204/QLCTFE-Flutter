@@ -31,9 +31,6 @@ class _RecurringScreenState extends State<RecurringScreen> {
     loadRecurring();
   }
 
-  // =============================
-  // 🔥 Load danh mục
-  // =============================
   Future<void> loadCategories() async {
     final token = await SecureStorage().getToken();
 
@@ -47,13 +44,9 @@ class _RecurringScreenState extends State<RecurringScreen> {
         categories = json.decode(res.body);
       });
     } else {
-      print("❌ Không load được categories: ${res.body}");
     }
   }
 
-  // =============================
-  // 🔥 Load danh sách recurring
-  // =============================
   Future<void> loadRecurring() async {
     setState(() => loading = true);
 
@@ -67,27 +60,22 @@ class _RecurringScreenState extends State<RecurringScreen> {
       if (res.statusCode == 200) {
         recurringList = json.decode(res.body);
       } else {
-        print("❌ Load recurring thất bại: ${res.body}");
       }
     } catch (e) {
-      print("❌ Load recurring lỗi: $e");
     }
 
     setState(() => loading = false);
   }
 
-  // =============================
-  // ➕ Tạo recurring
-  // =============================
   Future<void> createRecurring() async {
     final token = await SecureStorage().getToken();
 
     final body = {
-      "categoryId": selectedCategoryId, // ✔ ID danh mục
+      "categoryId": selectedCategoryId, 
       "amount": double.tryParse(amountC.text) ?? 0,
       "note": noteC.text.trim(),
       "frequency": frequency,
-      "nextDate": nextDate.toString().split(" ")[0], // ✔ yyyy-MM-dd
+      "nextDate": nextDate.toString().split(" ")[0], 
     };
 
     try {
@@ -100,25 +88,20 @@ class _RecurringScreenState extends State<RecurringScreen> {
         body: json.encode(body),
       );
 
-      print("📩 API tạo recurring: ${res.statusCode} - ${res.body}");
 
       if (res.statusCode == 200 || res.statusCode == 201) {
         Navigator.pop(context);
         loadRecurring();
       } else {
-        print("❌ Lỗi tạo recurring: ${res.body}");
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Không thể tạo giao dịch định kỳ")),
         );
       }
     } catch (e) {
-      print("❌ Lỗi tạo recurring: $e");
     }
   }
 
-  // =============================
-  // 🗑 Xóa
-  // =============================
+
   Future<void> deleteRecurring(int id) async {
     final token = await SecureStorage().getToken();
 
@@ -130,9 +113,7 @@ class _RecurringScreenState extends State<RecurringScreen> {
     loadRecurring();
   }
 
-  // =============================
-  // ▶ Test chạy ngay
-  // =============================
+
   Future<void> runNow() async {
     final token = await SecureStorage().getToken();
 
@@ -146,9 +127,7 @@ class _RecurringScreenState extends State<RecurringScreen> {
     );
   }
 
-  // =============================
-  // ➕ Popup thêm giao dịch
-  // =============================
+  
   void openAddDialog() {
     showDialog(
       context: context,
@@ -157,7 +136,7 @@ class _RecurringScreenState extends State<RecurringScreen> {
         content: SingleChildScrollView(
           child: Column(
             children: [
-              // 🔻 Dropdown DANH MỤC
+            
               DropdownButtonFormField<int>(
                 decoration: const InputDecoration(labelText: "Danh mục"),
                 value: selectedCategoryId,
@@ -185,7 +164,6 @@ class _RecurringScreenState extends State<RecurringScreen> {
 
               const SizedBox(height: 10),
 
-              // 🔁 Frequency Dropdown
               DropdownButton(
                 value: frequency,
                 items: const [
@@ -218,9 +196,7 @@ class _RecurringScreenState extends State<RecurringScreen> {
     );
   }
 
-  // =============================
-  // 🖼 Giao diện
-  // =============================
+ 
   @override
   Widget build(BuildContext context) {
     return Scaffold(

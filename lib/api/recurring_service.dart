@@ -15,7 +15,6 @@ class RecurringService {
     if (res.statusCode == 200) {
       return json.decode(res.body);
     } else {
-      print("❌ Lỗi tải recurring: ${res.body}");
       throw Exception("Lỗi tải recurring");
     }
   }
@@ -32,7 +31,6 @@ class RecurringService {
       body: json.encode(body),
     );
 
-    print("📩 Response tạo recurring: ${res.body}");
 
     return res.statusCode == 200 || res.statusCode == 201;
   }
@@ -41,11 +39,10 @@ class RecurringService {
     final token = await SecureStorage().getToken();
 
     final res = await http.delete(
-      Uri.parse("${ApiConstants.recurring}/$id"), // ✔ FIX URL
+      Uri.parse("${ApiConstants.recurring}/$id"), 
       headers: {"Authorization": "Bearer $token"},
     );
 
-    print("🗑 Response xóa: ${res.statusCode}");
 
     return res.statusCode == 204;
   }
@@ -54,10 +51,9 @@ class RecurringService {
     final token = await SecureStorage().getToken();
 
     final res = await http.post(
-      Uri.parse("${ApiConstants.recurring}/run-now"), // ✔ FIX URL
+      Uri.parse("${ApiConstants.recurring}/run-now"), 
       headers: {"Authorization": "Bearer $token"},
     );
 
-    print("▶ Run now response: ${res.statusCode}");
   }
 }

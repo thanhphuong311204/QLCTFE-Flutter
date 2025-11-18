@@ -78,8 +78,6 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     return format.format(amount);
   }
 
-  Color _getAmountColor(String type) =>
-      type == "expense" ? Colors.redAccent : Colors.green;
 
   @override
   Widget build(BuildContext context) {
@@ -125,9 +123,9 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                     child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center, // ✅ Căn giữa icon & text
+                      crossAxisAlignment: CrossAxisAlignment.center, 
                       children: [
-                        // Icon trái (mũi tên)
+                       
                         CircleAvatar(
                           radius: 22,
                           backgroundColor: tx.type == "expense"
@@ -145,7 +143,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                         ),
                         const SizedBox(width: 12),
 
-                        // Nội dung giữa (ghi chú, ngày, ví)
+                        
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -182,7 +180,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
 
                         const SizedBox(width: 8),
 
-                        // Cột bên phải (số tiền + nút xóa)
+                       
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -200,8 +198,8 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                               icon: const Icon(Icons.delete_outline, color: Colors.grey),
                               onPressed: () => _deleteTransaction(tx),
                               tooltip: "Xoá giao dịch",
-                              constraints: const BoxConstraints(), // ✅ Giúp icon nhỏ gọn
-                              padding: EdgeInsets.zero, // ✅ Loại bỏ padding mặc định
+                              constraints: const BoxConstraints(), 
+                              padding: EdgeInsets.zero, 
                             ),
                           ],
                         ),

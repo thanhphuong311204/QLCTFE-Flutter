@@ -17,10 +17,8 @@ class TransactionService {
     return token.trim();
   }
 
-  // 🟢 Lấy danh sách thu nhập
   Future<List<TransactionModel>> getIncomes() async {
     final token = await _getToken();
-    print("🔑 Token đang dùng: $token");
 
     final response = await http.get(
       Uri.parse(ApiConstants.incomes),
@@ -38,7 +36,6 @@ class TransactionService {
     }
   }
 
-  // 🔴 Lấy danh sách chi tiêu
   Future<List<TransactionModel>> getExpenses() async {
     final token = await _getToken();
 
@@ -58,17 +55,14 @@ class TransactionService {
     }
   }
 
-  // ➕ Thêm thu nhập
   Future<void> addIncome(Map<String, dynamic> data) async {
     await _createTransaction(ApiConstants.addIncome, data);
   }
 
-  // ➕ Thêm chi tiêu
   Future<void> addExpense(Map<String, dynamic> data) async {
     await _createTransaction(ApiConstants.addExpense, data);
   }
 
-  // ⚙️ Hàm xử lý chung cho Income + Expense
   Future<void> _createTransaction(String url, Map<String, dynamic> data) async {
     final token = await _getToken();
 
@@ -87,7 +81,6 @@ class TransactionService {
     }
   }
 
-  // ✏️ Cập nhật giao dịch
   Future<void> updateTransaction(
       int id, Map<String, dynamic> data, bool isExpense) async {
 
@@ -110,7 +103,6 @@ class TransactionService {
     }
   }
 
-  // 🗑️ Xoá giao dịch
   Future<void> deleteTransaction(int id, bool isExpense) async {
     final token = await _getToken();
     final url =
@@ -127,7 +119,6 @@ class TransactionService {
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw Exception("Không thể xoá giao dịch (${response.statusCode})");
     } else {
-      print("✅ Giao dịch $id xoá thành công (${response.statusCode})");
     }
   }
 }

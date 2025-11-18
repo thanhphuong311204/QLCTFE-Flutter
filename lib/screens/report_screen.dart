@@ -166,7 +166,7 @@ class _ReportScreenState extends State<ReportScreen> {
                       titlesData: FlTitlesData(
                         bottomTitles: AxisTitles(
                           sideTitles: SideTitles(
-                            showTitles: true,
+                            showTitles: false,
                             getTitlesWidget: (value, meta) {
                               final index = value.toInt();
                               if (index >= reports.length) return Container();

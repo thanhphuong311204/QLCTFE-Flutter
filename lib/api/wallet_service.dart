@@ -23,8 +23,6 @@ class WalletService {
     final token = await _getToken();   // lấy token từ SecureStorage
     final url = Uri.parse(ApiConstants.wallets);
 
-    print("🟢 [GET] $url");
-    print("📤 Token gửi đi: Bearer $token");
 
     final response = await http.get(
       url,
@@ -35,8 +33,6 @@ class WalletService {
       },
     );
 
-    print("📥 Code: ${response.statusCode}");
-    print("📦 Body: ${response.body}");
 
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
@@ -48,7 +44,6 @@ class WalletService {
     }
   }
 
-  // ➕ Thêm ví mới
   Future<void> addWallet({
     required String walletName,
     required double balance,
@@ -63,9 +58,6 @@ class WalletService {
       "type": type,
     };
 
-    print("🟢 [POST] $url");
-    print("📤 Body: $body");
-    print("📤 Token gửi đi: Bearer $token");
 
     final response = await http.post(
       url,
@@ -77,8 +69,6 @@ class WalletService {
       body: jsonEncode(body),
     );
 
-    print("📥 Code: ${response.statusCode}");
-    print("📦 Body: ${response.body}");
 
     if (response.statusCode != 200 && response.statusCode != 201) {
       throw Exception("🚫 Lỗi khi thêm ví (${response.statusCode})");
@@ -90,8 +80,6 @@ class WalletService {
     final token = await _getToken();
     final url = Uri.parse("${ApiConstants.wallets}/$walletId");
 
-    print("🟢 [PUT] $url");
-    print("📤 Token gửi đi: Bearer $token");
 
     final response = await http.put(
       url,
@@ -103,21 +91,16 @@ class WalletService {
       body: jsonEncode(data),
     );
 
-    print("📥 Code: ${response.statusCode}");
-    print("📦 Body: ${response.body}");
 
     if (response.statusCode != 200) {
       throw Exception("🚫 Lỗi khi cập nhật ví (${response.statusCode})");
     }
   }
 
-  // 🗑️ Xóa ví
   Future<void> deleteWallet(int walletId) async {
     final token = await _getToken();
     final url = Uri.parse("${ApiConstants.wallets}/$walletId");
 
-    print("🟢 [DELETE] $url");
-    print("📤 Token gửi đi: Bearer $token");
 
     final response = await http.delete(
       url,
@@ -128,8 +111,6 @@ class WalletService {
       },
     );
 
-    print("📥 Code: ${response.statusCode}");
-    print("📦 Body: ${response.body}");
 
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw Exception("🚫 Lỗi khi xóa ví (${response.statusCode})");

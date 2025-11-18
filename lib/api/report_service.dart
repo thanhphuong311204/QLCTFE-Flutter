@@ -6,20 +6,31 @@ import 'package:qlctfe/models/report_model.dart';
 
 class ReportService {
   Future<List<ReportModel>> fetchReports() async {
-    final token = await SecureStorage().getToken();
+  final token = await SecureStorage().getToken();
+  final url = "${ApiConstants.baseUrl}/api/reports";
 
-    final res = await http.get(
-      Uri.parse("${ApiConstants.baseUrl}/reports"),
-      headers: {"Authorization": "Bearer $token"},
-    );
+  print("FULL URL: $url");
+  print("SENDING HEADER:");
+  print("Authorization: Bearer $token");
+  print("Content-Type: application/json");
 
-    if (res.statusCode == 200) {
-      final data = json.decode(res.body);
-      return (data as List).map((e) => ReportModel.fromJson(e)).toList();
-    } else {
-      throw Exception("Lỗi tải báo cáo: ${res.statusCode}");
-    }
+  final res = await http.get(
+    Uri.parse(url),
+    headers: {
+      "Authorization": "Bearer $token",
+      "Content-Type": "application/json",
+    },
+  );
+
+
+  if (res.statusCode == 200) {
+    final data = json.decode(res.body);
+    return (data as List).map((e) => ReportModel.fromJson(e)).toList();
+  } else {
+    throw Exception("Lỗi tải báo cáo: ${res.statusCode}");
   }
+}
+
 
   Future<void> createReport(Map<String, dynamic> body) async {
     final token = await SecureStorage().getToken();
@@ -27,7 +38,7 @@ class ReportService {
     final res = await http.post(
       Uri.parse("${ApiConstants.baseUrl}/reports"),
       headers: {
-        "Authorization": "Bearer $token",
+        "Authorization": "Bearer $token",           
         "Content-Type": "application/json",
       },
       body: json.encode(body),

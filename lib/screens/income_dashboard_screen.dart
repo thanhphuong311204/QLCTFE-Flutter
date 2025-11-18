@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import '../api/transaction_service.dart';
 import '../models/transaction_model.dart';
 
+
 class IncomeDashboardScreen extends StatefulWidget {
   const IncomeDashboardScreen({super.key});
 
@@ -94,13 +95,12 @@ class _IncomeDashboardScreenState extends State<IncomeDashboardScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // 🔵 Biểu đồ tròn (hiển thị giá trị tiền)
                       SizedBox(
                         height: 270,
                         child: PieChart(
                           PieChartData(
                             sectionsSpace: 2,
-                            centerSpaceRadius: 0, // ✅ Không donut
+                            centerSpaceRadius: 0, 
                             borderData: FlBorderData(show: false),
                             sections: _buildChartSections(
                               categoryTotals,
@@ -112,7 +112,6 @@ class _IncomeDashboardScreenState extends State<IncomeDashboardScreen> {
 
                       const SizedBox(height: 20),
 
-                      // 📋 Ghi chú danh mục + giá trị
                       ...categoryTotals.entries.map((e) {
                         final color = colorPalette[
                             categoryTotals.keys.toList().indexOf(e.key) %
@@ -143,15 +142,10 @@ class _IncomeDashboardScreenState extends State<IncomeDashboardScreen> {
     return data.entries.map((e) {
       final color = colors[i++ % colors.length];
       return PieChartSectionData(
+        showTitle: false,
         color: color,
         value: e.value,
         radius: 80,
-        title: "${format.format(e.value)} đ", // ✅ chỉ hiển thị giá trị tiền
-        titleStyle: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
       );
     }).toList();
   }

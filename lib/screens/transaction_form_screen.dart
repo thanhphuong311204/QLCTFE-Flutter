@@ -105,7 +105,6 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
 
     try {
       if (widget.transaction == null) {
-        // ➕ Thêm mới
         if (widget.isExpense) {
           await _transactionService.addExpense(data);
         } else {
@@ -115,7 +114,6 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
           const SnackBar(content: Text("✅ Thêm giao dịch thành công!")),
         );
       } else {
-        // ✏️ Cập nhật
         await _transactionService.updateTransaction(
           widget.transaction!.id,
           data,

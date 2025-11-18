@@ -26,11 +26,10 @@ class _GoalScreenState extends State<GoalScreen> {
   @override
   void initState() {
     super.initState();
-    _goals = _goalService.getGoals(); // ✅ Không dùng setState() ở đây
+    _goals = _goalService.getGoals();
     _loadDropdownData();
   }
 
-  /// ✅ Chỉ dùng setState() để gán dữ liệu đã load xong
   Future<void> _loadDropdownData() async {
     try {
       final cats = await _categoryService.getCategories();
@@ -41,11 +40,9 @@ class _GoalScreenState extends State<GoalScreen> {
         _wallets = wallets;
       });
     } catch (e) {
-      print("⚠️ Lỗi load dropdown: $e");
     }
   }
 
-  /// ✅ Tải lại danh sách mục tiêu (dùng để refresh)
   Future<void> _refreshGoals() async {
     final refreshed = _goalService.getGoals();
     if (!mounted) return;

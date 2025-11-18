@@ -130,19 +130,14 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
     List<Color> colors,
   ) {
     int i = 0;
-    final format = NumberFormat("#,##0", "vi_VN");
+
     return data.entries.map((e) {
       final color = colors[i++ % colors.length];
       return PieChartSectionData(
         color: color,
         value: e.value,
         radius: 80,
-        title: "${format.format(e.value)} đ", // ✅ hiển thị số tiền
-        titleStyle: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
+        showTitle: false
       );
     }).toList();
   }

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../api/wallet_service.dart';
 import '../models/wallet_model.dart';
-import 'wallet_detail_screen.dart'; // ✅ thêm dòng này để import màn chi tiết ví
+import 'wallet_detail_screen.dart'; 
 
 class WalletScreen extends StatefulWidget {
   const WalletScreen({super.key});
@@ -198,8 +197,6 @@ class _WalletScreenState extends State<WalletScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final formatCurrency =
-        NumberFormat.currency(locale: "vi_VN", symbol: "đ", decimalDigits: 0);
 
     return Scaffold(
       appBar: AppBar(title: const Text("Danh sách ví")),

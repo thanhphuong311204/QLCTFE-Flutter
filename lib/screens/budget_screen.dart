@@ -134,7 +134,6 @@ class _BudgetScreenState extends State<BudgetScreen> {
     }
   }
 
-  // 🧱 Item hiển thị từng ngân sách
   Widget _buildBudgetCard(Budget budget) {
     final percent = (budget.spentAmount / budget.amountLimit).clamp(0, 1);
     final progressColor = percent >= 0.9
@@ -176,7 +175,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
     );
   }
 
-  // 🧩 UI tổng thể
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -220,7 +219,6 @@ class _BudgetScreenState extends State<BudgetScreen> {
     );
   }
 
-  // 🧠 Load danh mục
   Future<List<CategoryModel>> fetchCategories() async {
     final token = await SecureStorage().getToken();
     final res = await http.get(
@@ -236,10 +234,9 @@ class _BudgetScreenState extends State<BudgetScreen> {
     }
   }
 
-  // 💰 Load ví
+  
   Future<List<Wallet>> fetchWallets() async {
     final token = await SecureStorage().getToken();
-    print("🔑 Token gửi tới backend: $token");
     final res = await http.get(
       Uri.parse("${ApiConstants.wallets}"),
       headers: {"Authorization": "Bearer $token"},

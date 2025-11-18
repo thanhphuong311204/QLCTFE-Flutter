@@ -12,6 +12,7 @@ import 'package:qlctfe/screens/notification_screen.dart';
 import 'package:qlctfe/screens/recurring_screen.dart';
 import 'package:qlctfe/screens/register_screen.dart';
 import 'package:qlctfe/screens/report_screen.dart';
+import 'package:qlctfe/screens/settings_screen.dart';
 import 'package:qlctfe/screens/transaction_form_screen.dart';
 import 'package:qlctfe/screens/transaction_history_screen.dart';
 import 'package:qlctfe/screens/wallet_screen.dart';
@@ -48,7 +49,6 @@ class _CategoryScreenState extends State<CategoryScreen>
     super.dispose();
   }
 
-  // 🔥 Load số thông báo chưa đọc
   Future<void> _loadUnreadNotifications() async {
     try {
       final list = await _notiService.getNotifications();
@@ -58,7 +58,6 @@ class _CategoryScreenState extends State<CategoryScreen>
     } catch (_) {}
   }
 
-  // 🔐 Kiểm tra login
   Future<void> _requireLogin(VoidCallback action) async {
     final loggedIn = await _auth.isLoggin();
     if (!mounted) return;
@@ -127,93 +126,98 @@ class _CategoryScreenState extends State<CategoryScreen>
   // ⭐ APPBAR MỚI ⭐
   // ======================
 
-  AppBar _buildAppBar() {
-    return AppBar(
-      backgroundColor: Colors.orange.shade100,
-      elevation: 0,
-      title: const Text(
-        "Danh mục",
-        style: TextStyle(
-          fontWeight: FontWeight.w700,
-          color: Colors.black87,
-        ),
+AppBar _buildAppBar() {
+  return AppBar(
+    backgroundColor: Colors.orange.shade100,
+    elevation: 0,
+    title: const Text(
+      "Danh mục",
+      style: TextStyle(
+        fontWeight: FontWeight.w700,
+        color: Colors.black87,
       ),
-      centerTitle: true,
-      actions: [
-        // 🔔 ICON THÔNG BÁO + BADGE
-        Stack(
-          children: [
-            IconButton(
-              tooltip: "Thông báo",
-              icon: const Icon(Icons.notifications_outlined),
-              onPressed: () async {
-                // ⭐ 1. Gọi API mark all đã đọc
-                try {
-                  await _notiService.markAllAsRead();
-                } catch (e) {
-                  debugPrint("Lỗi markAll: $e");
-                }
+    ),
+    centerTitle: true,
+    actions: [
 
-                // ⭐ 2. Hạ badge ngay lập tức
-                setState(() => _unread = 0);
+      // 🔔 ICON THÔNG BÁO + BADGE
+      Stack(
+        children: [
+          IconButton(
+            tooltip: "Thông báo",
+            icon: const Icon(Icons.notifications_outlined),
+            onPressed: () async {
+              try {
+                await _notiService.markAllAsRead();
+              } catch (_) {}
 
-                // ⭐ 3. Mở màn hình thông báo
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const NotificationScreen()),
-                );
+              setState(() => _unread = 0);
 
-                // ⭐ 4. Reload sau khi quay về
-                _loadUnreadNotifications();
-              },
-            ),
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const NotificationScreen()),
+              );
 
-            // 🔴 Badge số thông báo chưa đọc
-            if (_unread > 0)
-              Positioned(
-                right: 6,
-                top: 6,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    "$_unread",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
+              _loadUnreadNotifications();
+            },
+          ),
+
+          if (_unread > 0)
+            Positioned(
+              right: 6,
+              top: 6,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  "$_unread",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-          ],
-        ),
-
-        IconButton(
-          tooltip: "Menu",
-          icon: const Icon(Icons.more_vert),
-          onPressed: () => _openMenuSheet(),
-        ),
-      ],
-      bottom: TabBar(
-        controller: _tabController,
-        labelColor: Colors.orange.shade800,
-        unselectedLabelColor: Colors.grey,
-        indicatorColor: Colors.orangeAccent,
-        tabs: const [
-          Tab(text: "Chi tiêu"),
-          Tab(text: "Thu nhập"),
+            ),
         ],
       ),
-    );
-  }
 
-  // ======================
-  // ⭐ MENU SHEET
-  // ======================
+      // ⚙️ ICON CÀI ĐẶT (đặt riêng, không gộp stack)
+      IconButton(
+        tooltip: "Cài đặt",
+        icon: const Icon(Icons.settings),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const SettingsScreen()),
+          );
+        },
+      ),
+
+      // ⋮ MENU
+      IconButton(
+        tooltip: "Menu",
+        icon: const Icon(Icons.more_vert),
+        onPressed: () => _openMenuSheet(),
+      ),
+
+    ],
+
+    bottom: TabBar(
+      controller: _tabController,
+      labelColor: Colors.orange.shade800,
+      unselectedLabelColor: Colors.grey,
+      indicatorColor: Colors.orangeAccent,
+      tabs: const [
+        Tab(text: "Chi tiêu"),
+        Tab(text: "Thu nhập"),
+      ],
+    ),
+  );
+}
 
   void _openMenuSheet() {
     showModalBottomSheet(

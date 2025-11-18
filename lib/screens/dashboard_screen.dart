@@ -5,7 +5,6 @@ import '../api/transaction_service.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
-
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
@@ -29,11 +28,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       final incomes = await _transactionService.getIncomes();
       final expenses = await _transactionService.getExpenses();
 
-      // Tổng thu & chi
       totalIncome = incomes.fold(0, (sum, t) => sum + t.amount);
       totalExpense = expenses.fold(0, (sum, t) => sum + t.amount);
 
-      // Gom chi tiêu theo danh mục
       categoryTotals.clear();
       for (var t in expenses) {
         categoryTotals[t.categoryName] =

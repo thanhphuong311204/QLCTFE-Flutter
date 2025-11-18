@@ -13,16 +13,13 @@ class GoalService {
       throw Exception("🚫 Chưa đăng nhập!");
     }
 
-    print("🔑 Token đọc từ SecureStorage: $token");
     return token;
   }
 
-  // 🟢 Lấy danh sách mục tiêu
   Future<List<GoalModel>> getGoals() async {
     final token = await _getToken();
     final url = Uri.parse(ApiConstants.goals);
 
-    print("📤 GET $url");
 
     final response = await http.get(
       url,
@@ -32,7 +29,6 @@ class GoalService {
       },
     );
 
-    print("📥 GET Goals: ${response.statusCode}");
 
     if (response.statusCode == 200) {
       final List data = jsonDecode(response.body);
@@ -42,12 +38,10 @@ class GoalService {
     }
   }
 
-  // 🟢 Thêm mục tiêu mới
   Future<void> addGoal(Map<String, dynamic> goalData) async {
     final token = await _getToken();
     final url = Uri.parse(ApiConstants.goals);
 
-    print("📤 POST $url - $goalData");
 
     final response = await http.post(
       url,
@@ -58,20 +52,17 @@ class GoalService {
       body: jsonEncode(goalData),
     );
 
-    print("📥 POST Goal: ${response.statusCode}");
 
     if (response.statusCode != 200 && response.statusCode != 201) {
       throw Exception('Lỗi tạo mục tiêu: ${response.statusCode}');
     }
   }
 
-  // 🟢 Cập nhật tiến độ
   Future<void> updateProgress(int goalId, double amount) async {
     final token = await _getToken();
     final url = Uri.parse('${ApiConstants.goals}/$goalId/progress');
     final body = jsonEncode({'amount': amount});
 
-    print("📤 PUT $url");
 
     final response = await http.put(
       url,
@@ -83,7 +74,6 @@ class GoalService {
       body: body,
     );
 
-    print("📥 PUT Goals: ${response.statusCode}");
 
     if (response.statusCode != 200) {
       throw Exception('Lỗi cập nhật tiến độ (${response.statusCode})');
@@ -95,7 +85,6 @@ class GoalService {
     final token = await _getToken();
     final url = Uri.parse('${ApiConstants.goals}/$id');
 
-    print("📤 DELETE $url");
 
     final response = await http.delete(
       url,
@@ -104,7 +93,6 @@ class GoalService {
       },
     );
 
-    print("📥 DELETE Goals: ${response.statusCode}");
 
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw Exception('Lỗi xoá mục tiêu (${response.statusCode})');

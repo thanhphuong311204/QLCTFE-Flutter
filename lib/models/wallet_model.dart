@@ -26,7 +26,6 @@ class Wallet {
         }
       }
     } catch (e) {
-      print('❌ Lỗi parse balance: $e');
     }
 
     return Wallet(
