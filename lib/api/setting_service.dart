@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:qlctfe/api/secure_storage.dart';
 import 'package:qlctfe/api/api_constants.dart';
+import 'package:qlctfe/api/secure_storage.dart';
 
-class SettingService {
+class SettingsService {
   final storage = SecureStorage();
 
   Future<Map<String, dynamic>> getSettings() async {
@@ -16,11 +16,11 @@ class SettingService {
       },
     );
 
-    if (res.statusCode != 200) {
-      throw Exception("Lỗi tải setting: ${res.statusCode}");
+    if (res.statusCode == 200) {
+      return json.decode(res.body);
     }
 
-    return jsonDecode(res.body);
+    throw Exception("Lỗi tải setting: ${res.statusCode}");
   }
 
   Future<void> updateSettings(Map<String, dynamic> body) async {
@@ -32,7 +32,7 @@ class SettingService {
         "Authorization": "Bearer $token",
         "Content-Type": "application/json",
       },
-      body: jsonEncode(body),
+      body: json.encode(body),
     );
 
     if (res.statusCode != 200) {

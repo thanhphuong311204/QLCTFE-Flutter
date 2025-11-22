@@ -12,10 +12,16 @@ class NotificationService {
   Future<List<dynamic>> getNotifications() async {
     final token = await _token();
 
+    final url = "${ApiConstants.baseUrl}/api/notifications";
+    print("URL: $url");
+
     final res = await http.get(
-      Uri.parse("${ApiConstants.baseUrl}/notifications"),
+      Uri.parse(url),
       headers: {"Authorization": "Bearer $token"},
     );
+
+    print("Status: ${res.statusCode}");
+    print("Body: ${res.body}");
 
     if (res.statusCode == 200) {
       return jsonDecode(res.body);

@@ -45,15 +45,11 @@ class AuthService {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
 
-        // 👉 GIỮ NGUYÊN token backend trả về
         String? rawToken = data['token'] ?? data['accessToken'];
         print("🔥 TOKEN BACKEND TRẢ: $rawToken"); 
         if (rawToken == null || rawToken.isEmpty) {
           return false;
         }
-
-        // ❌ Không xoá chữ Bearer nữa
-        // rawToken = rawToken.replaceAll("Bearer ", "").trim();
 
         final storage = SecureStorage();
 

@@ -122,9 +122,6 @@ class _CategoryScreenState extends State<CategoryScreen>
     );
   }
 
-  // ======================
-  // ⭐ APPBAR MỚI ⭐
-  // ======================
 
 AppBar _buildAppBar() {
   return AppBar(
@@ -140,7 +137,7 @@ AppBar _buildAppBar() {
     centerTitle: true,
     actions: [
 
-      // 🔔 ICON THÔNG BÁO + BADGE
+    
       Stack(
         children: [
           IconButton(
@@ -185,7 +182,6 @@ AppBar _buildAppBar() {
         ],
       ),
 
-      // ⚙️ ICON CÀI ĐẶT (đặt riêng, không gộp stack)
       IconButton(
         tooltip: "Cài đặt",
         icon: const Icon(Icons.settings),
@@ -196,8 +192,13 @@ AppBar _buildAppBar() {
           );
         },
       ),
+       IconButton(
+      icon: const Icon(Icons.person),
+      onPressed: () {
+        Navigator.pushNamed(context, "/profile");
+      },
+    ),
 
-      // ⋮ MENU
       IconButton(
         tooltip: "Menu",
         icon: const Icon(Icons.more_vert),
@@ -309,9 +310,7 @@ AppBar _buildAppBar() {
     );
   }
 
-  // ======================
-  // ⭐ GRID CATEGORY
-  // ======================
+ 
 
   Widget _buildCategoryGrid(List<CategoryModel> list) {
     return GridView.builder(
@@ -383,9 +382,6 @@ AppBar _buildAppBar() {
     );
   }
 
-  // ======================
-  // ⭐ BOTTOM QUICK ADD
-  // ======================
 
   Widget _buildBottomButtons() {
     return FutureBuilder<List<CategoryModel>>(

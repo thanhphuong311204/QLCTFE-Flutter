@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:qlctfe/screens/category_screen.dart';
+import 'package:qlctfe/screens/profile/profile_screen.dart';
+import 'package:qlctfe/screens/profile/change_password_screen.dart';
+
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,12 +29,21 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      
       debugShowCheckedModeBanner: false,
-      title: "QLCT",
+      title: 'QLCT',
+      theme: ThemeData(
+        colorSchemeSeed: Colors.orange,
+        useMaterial3: true,
+      ),
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
       locale: context.locale,
-      home: const CategoryScreen(), 
+      routes: {
+    "/profile": (_) => const ProfileScreen(),
+    "/change-password": (_) => const ChangePasswordScreen(),
+  },
+      home: const CategoryScreen(),
     );
   }
 }

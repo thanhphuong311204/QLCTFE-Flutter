@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:qlctfe/api/notification_service.dart';
 
+// 👉 IMPORT các màn hình đích
+import 'package:qlctfe/screens/transaction_history_screen.dart';
+import 'package:qlctfe/screens/income_dashboard_screen.dart';
+import 'package:qlctfe/screens/budget_screen.dart';
+
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
 
@@ -73,6 +78,46 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       ),
                     ),
                     subtitle: Text(n["notificationMessage"]),
+
+                    // 🔥🔥🔥 NHẤN VÀO THÔNG BÁO ĐỂ ĐIỀU HƯỚNG
+                    onTap: () {
+                      final refType = n["referenceType"];
+                      final refId = n["referenceId"];
+                      print("Tapped → $refType | $refId");
+
+                      if (refType == null) return;
+
+                      // EXPENSE → mở lịch sử giao dịch
+                      if (refType == "EXPENSE") {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const TransactionHistoryScreen(),
+                          ),
+                        );
+                      }
+
+                      // INCOME → mở dashboard thu nhập
+                      if (refType == "INCOME") {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const IncomeDashboardScreen(),
+                          ),
+                        );
+                      }
+
+                      // BUDGET → mở màn hình ngân sách
+                      if (refType == "BUDGET") {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const BudgetScreen(),
+                          ),
+                        );
+                      }
+                    },
+
                     trailing: PopupMenuButton(
                       itemBuilder: (_) => [
                         PopupMenuItem(

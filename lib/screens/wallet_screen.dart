@@ -134,7 +134,6 @@ class _WalletScreenState extends State<WalletScreen> {
     );
   }
 
-  // 🗑️ Xóa ví (có xác nhận)
   Future<void> _deleteWallet(int walletId) async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -164,7 +163,6 @@ class _WalletScreenState extends State<WalletScreen> {
     }
   }
 
-  // 🎨 Màu & icon loại ví
   Color _getTypeColor(String type) {
     switch (type.toLowerCase()) {
       case "ngân hàng":
@@ -225,7 +223,6 @@ class _WalletScreenState extends State<WalletScreen> {
                       ),
                       subtitle: Text("Loại: ${w.type}"),
 
-                      // ✅ Khi bấm vào ví → mở chi tiết ví
                       onTap: () {
                         Navigator.push(
                           context,

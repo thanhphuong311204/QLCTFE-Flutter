@@ -23,6 +23,11 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_secure_storage: ^9.2.4
   fl_chart: ^1.1.1
+  image_picker: ^1.0.7
+  dio: ^5.0.0
+  image_cropper:
+  permission_handler: ^11.0.1
+
 
 dev_dependencies:
   flutter_test:
@@ -36,4 +41,5 @@ flutter:
     - assets/images/piggy.png
     - assets/icons/expenses/
     - assets/icons/incomes/
-    - assets/lang/
+    - assets/lang/en-US.json
+    - assets/lang/vi-VN.json
