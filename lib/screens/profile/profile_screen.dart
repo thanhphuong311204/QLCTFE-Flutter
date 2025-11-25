@@ -32,22 +32,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
     loadUser();
   }
 
-  Future<void> loadUser() async {
-    try {
-      final data = await _service.getCurrentUser();
+Future<void> loadUser() async {
+  try {
+    final data = await _service.getCurrentUser();
 
-      setState(() {
-        nameController.text = data["fullName"] ?? "";
-        phoneController.text = data["phone"] ?? "";
-        email = data["email"];
-        avatarUrl = data["avatarUrl"];
-        createdAt = data["createdAt"];
-        loading = false;
-      });
-    } catch (e) {
+    setState(() {
+      nameController.text = data["fullName"] ?? "";
+      phoneController.text = data["phone"] ?? "";
+      email = data["email"];
+      avatarUrl = data["avatarUrl"];
+      createdAt = data["createdAt"];
       loading = false;
-    }
+    });
+  } catch (e) {
+    setState(() {  // <-- thêm dòng này
+      loading = false;
+    });
+
+    // Debug xem lỗi gì
+    print("LỖI loadUser: $e");
   }
+}
 
   String getJoinDate(String iso) {
     try {

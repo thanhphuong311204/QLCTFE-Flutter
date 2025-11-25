@@ -30,7 +30,6 @@ class NotificationService {
     }
   }
 
-  // 🟡 Đánh dấu 1 cái đã đọc
   Future<void> markAsRead(int id) async {
     final token = await _token();
     await http.put(
@@ -39,7 +38,6 @@ class NotificationService {
     );
   }
 
-  // ⭐ Đánh dấu TẤT CẢ đã đọc
   Future<void> markAllAsRead() async {
     final token = await _token();
     await http.put(
@@ -48,7 +46,6 @@ class NotificationService {
     );
   }
 
-  // 🔴 Xóa thông báo
   Future<void> deleteNotification(int id) async {
     final token = await _token();
     await http.delete(
