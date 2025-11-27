@@ -1,5 +1,5 @@
 name: qlctfe
-description: "A new Flutter project."
+description: "Personal Finance Management App"
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -11,23 +11,46 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # 📅 Lịch và tiện ích cơ bản
+  table_calendar: ^3.1.2
+
+  # 🌐 Đa ngôn ngữ & ngày tháng
   flutter_localizations:
     sdk: flutter
-
   easy_localization: ^3.0.2
   intl: ^0.20.2
 
+  # 📊 Biểu đồ & thống kê
   pie_chart: ^5.4.0
-  http: ^1.5.0
-  shared_preferences: ^2.3.2
-  cupertino_icons: ^1.0.8
-  flutter_secure_storage: ^9.2.4
   fl_chart: ^1.1.1
-  image_picker: ^1.0.7
+
+  # 🌍 HTTP & API
+  http: ^1.5.0
   dio: ^5.0.0
-  image_cropper:
+
+  # 💾 Lưu trữ cục bộ & bảo mật
+  shared_preferences: ^2.3.2
+  flutter_secure_storage: ^9.2.4
+
+  # 📱 Quyền & media
+  image_picker: ^1.0.7
+  image_cropper: ^8.0.2
   permission_handler: ^11.0.1
 
+  # 📂 Xuất Excel & chia sẻ
+  excel: ^4.0.2
+  path_provider: ^2.1.3
+  open_filex: ^4.3.2
+  share_plus: ^10.0.2
+  universal_html: ^2.2.4
+  universal_io: ^2.2.2
+  file_saver: ^0.2.12
+
+  # 🔧 Quản lý trạng thái
+  provider: ^6.1.2
+
+  # 🌈 Icon iOS mặc định
+  cupertino_icons: ^1.0.8
 
 dev_dependencies:
   flutter_test:

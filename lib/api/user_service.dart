@@ -49,7 +49,7 @@ class UserService {
     final token = await storage.getToken();
 
     final res = await http.put(
-      Uri.parse("${ApiConstants.users}/change-password"),
+Uri.parse("${ApiConstants.baseUrl}/api/user/change-password"),
       headers: {
         "Authorization": "Bearer $token",
         "Content-Type": "application/json",
@@ -75,7 +75,6 @@ class UserService {
     "Accept": "application/json",
   });
 
-  // 🔍 Tự detect loại file theo đuôi
   String ext = filePath.split(".").last.toLowerCase();
 
   String mimeType = "jpg";

@@ -36,7 +36,7 @@ class ReportService {
     final token = await SecureStorage().getToken();
 
     final res = await http.post(
-      Uri.parse("${ApiConstants.baseUrl}/reports"),
+      Uri.parse("${ApiConstants.baseUrl}/api/reports"),
       headers: {
         "Authorization": "Bearer $token",           
         "Content-Type": "application/json",

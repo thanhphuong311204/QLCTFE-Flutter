@@ -1,7 +1,6 @@
 class ApiConstants {
-  static const String baseUrl = "http://192.168.31.214:8080";
+  static const String baseUrl = "http://192.168.31.221:8080";
 
-  // 🔹 Các endpoint chính
   static const String register = "$baseUrl/api/auth/register";
   static const String login = "$baseUrl/api/auth/login";
   static const String categories = "$baseUrl/api/categories";

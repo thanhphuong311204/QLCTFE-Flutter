@@ -1,11 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:image_cropper/image_cropper.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:qlctfe/api/user_service.dart';
-import 'change_password_screen.dart';
+import 'package:qlctfe/api/secure_storage.dart';
+import 'package:qlctfe/api/api_constants.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -15,267 +14,291 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final _service = UserService();
-  bool loading = true;
-  bool uploadingAvatar = false;
+  final TextEditingController _nameCtrl = TextEditingController();
+  final TextEditingController _phoneCtrl = TextEditingController();
 
-  String email = "";
-  String? avatarUrl;
-  String? createdAt;
+  String? _email;
+  String? _username;
+  String? _avatarUrl;
+  String? _createdAt;
+  int? _walletCount;
+  double? _totalBalance;
 
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
+  File? _pickedImage;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    loadUser();
+    _fetchProfile();
   }
 
-Future<void> loadUser() async {
-  try {
-    final data = await _service.getCurrentUser();
+  Future<void> _fetchProfile() async {
+    final token = await SecureStorage().getToken();
 
+    try {
+      final res = await http.get(
+        Uri.parse("${ApiConstants.baseUrl}/api/user/profile"),
+        headers: {"Authorization": "Bearer $token"},
+      );
+
+      if (res.statusCode == 200) {
+        final data = json.decode(res.body);
+
+        setState(() {
+          _nameCtrl.text = data['fullName'] ?? "";
+          _phoneCtrl.text = data['phone'] ?? "";
+          _email = data['email'];
+          _username = data['username'];
+          _avatarUrl = data['avatarUrl'];
+          _createdAt = data['createdAt'];
+          _walletCount = data['walletCount'];
+          _totalBalance = (data['totalBalance'] ?? 0).toDouble();
+        });
+      } else {
+        throw Exception("Không thể tải thông tin người dùng (status ${res.statusCode})");
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Lỗi khi tải hồ sơ: $e")),
+      );
+    }
+  }
+
+Future<void> _pickImage() async {
+  final picker = ImagePicker();
+  final image = await picker.pickImage(source: ImageSource.gallery);
+
+  if (image != null) {
     setState(() {
-      nameController.text = data["fullName"] ?? "";
-      phoneController.text = data["phone"] ?? "";
-      email = data["email"];
-      avatarUrl = data["avatarUrl"];
-      createdAt = data["createdAt"];
-      loading = false;
-    });
-  } catch (e) {
-    setState(() {  // <-- thêm dòng này
-      loading = false;
+      _pickedImage = File(image.path);
     });
 
-    // Debug xem lỗi gì
-    print("LỖI loadUser: $e");
+    await _uploadAvatar();
   }
 }
+Future<void> _uploadAvatar() async {
+  if (_pickedImage == null) return;
 
-  String getJoinDate(String iso) {
-    try {
-      return DateFormat('dd/MM/yyyy').format(DateTime.parse(iso));
-    } catch (_) {
-      return "";
-    }
-  }
+  setState(() => _isLoading = true);
 
-  // ============================================
-  // 🔥 PICK AVATAR + REQUEST PERMISSION + CROP
-  // ============================================
-  Future<void> pickAvatar() async {
-    // 1. Xin permission cho Android 13+
-    final status = await Permission.photos.request();
+  try {
+    final token = await SecureStorage().getToken();
+    final uri = Uri.parse("${ApiConstants.baseUrl}/api/upload/image");
 
-    if (!status.isGranted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Bạn phải cho phép quyền truy cập ảnh")),
-      );
-      return;
-    }
+    var request = http.MultipartRequest("POST", uri);
+    request.headers["Authorization"] = "Bearer $token";
 
-    // 2. Chọn ảnh
-    final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.gallery);
+    request.files.add(
+      await http.MultipartFile.fromPath(
+        "file",
+        _pickedImage!.path,
+      ),
+    );
 
-    if (picked == null) return;
+    final streamed = await request.send();
+    final responseBody = await streamed.stream.bytesToString();
 
-    await uploadAvatar(picked.path);
-  }
+    print("📌 Upload response: $responseBody");
 
-  Future<void> uploadAvatar(String filePath) async {
-    setState(() => uploadingAvatar = true);
+    if (streamed.statusCode == 200) {
+      final jsonData = json.decode(responseBody);
 
-    final url = await _service.uploadAvatar(filePath);
+      setState(() {
+        _avatarUrl =
+            "${jsonData["avatarUrl"]}?v=${DateTime.now().millisecondsSinceEpoch}";
+        _pickedImage = null;
+      });
 
-    if (url != null) {
-      setState(() => avatarUrl = url);
+      // 🔥 Reload profile để đảm bảo avatar được update từ backend
+      await _fetchProfile();
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("✔ Đã cập nhật ảnh đại diện")),
+        const SnackBar(content: Text("Upload avatar thành công!")),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("❌ Không thể cập nhật ảnh")),
+        SnackBar(content: Text("Upload thất bại (${streamed.statusCode})")),
       );
     }
-
-    setState(() => uploadingAvatar = false);
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Lỗi upload avatar: $e")),
+    );
+  } finally {
+    setState(() => _isLoading = false);
   }
+}
 
-  Future<void> saveProfile() async {
+  /// 💾 Gửi yêu cầu cập nhật thông tin
+  Future<void> _updateProfile() async {
+    setState(() => _isLoading = true);
+    final token = await SecureStorage().getToken();
+
     try {
-      await _service.updateProfile(
-        fullName: nameController.text,
-        phone: phoneController.text,
+      final body = json.encode({
+        "fullName": _nameCtrl.text.trim(),
+        "phone": _phoneCtrl.text.trim(),
+      });
+
+      final res = await http.put(
+        Uri.parse("${ApiConstants.baseUrl}/api/user/profile"),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+        body: body,
       );
 
-      setState(() {});
-
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("✔ Đã cập nhật")));
+      if (res.statusCode == 200) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text("Cập nhật thành công!")));
+        _fetchProfile(); // reload lại
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Cập nhật thất bại: ${res.statusCode}")),
+        );
+      }
     } catch (e) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text("Lỗi: $e")));
+    } finally {
+      setState(() => _isLoading = false);
     }
+  }
+
+  String _formatMoney(double value) {
+    return "${value.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')} ₫";
   }
 
   @override
   Widget build(BuildContext context) {
-    if (loading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
-
     return Scaffold(
-      backgroundColor: Colors.orange.shade50,
+      backgroundColor: const Color(0xffFEF5E7),
       appBar: AppBar(
-        title: const Text(
-          "Hồ sơ cá nhân",
-          style: TextStyle(fontWeight: FontWeight.w600),
-        ),
-        backgroundColor: Colors.orange.shade200,
+        title: const Text("Hồ sơ cá nhân"),
+        backgroundColor: const Color(0xffF4C97D),
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             GestureDetector(
-              onTap: uploadingAvatar ? null : pickAvatar,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black12, blurRadius: 8, spreadRadius: 1)
-                      ],
-                    ),
-                    child: CircleAvatar(
-                      radius: 55,
-                      backgroundImage:
-                          avatarUrl != null ? NetworkImage(avatarUrl!) : null,
-                      child: avatarUrl == null
-                          ? const Icon(Icons.person,
-                              size: 60, color: Colors.grey)
-                          : null,
-                    ),
-                  ),
-                  if (uploadingAvatar)
-                    const CircularProgressIndicator(color: Colors.orange)
-                ],
+              onTap: _pickImage,
+              child: CircleAvatar(
+                radius: 55,
+                backgroundColor: Colors.grey[300],
+                backgroundImage: _pickedImage != null
+    ? FileImage(_pickedImage!)
+    : (_avatarUrl != null
+        ? NetworkImage(_avatarUrl!)
+        : null),
+child: (_pickedImage == null && _avatarUrl == null)
+    ? const Icon(Icons.person, size: 45, color: Colors.grey)
+    : Align(
+        alignment: Alignment.bottomRight,
+        child: Container(
+          padding: const EdgeInsets.all(4),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(Icons.camera_alt, size: 18, color: Colors.orange),
+        ),
+      ),
               ),
             ),
-
-            const SizedBox(height: 12),
-
+            const SizedBox(height: 10),
             Text(
-              nameController.text.isEmpty ? "Chưa có tên" : nameController.text,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              _nameCtrl.text.isNotEmpty ? _nameCtrl.text : "Chưa có tên",
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-
-            const SizedBox(height: 4),
-
             Text(
-              email,
-              style: TextStyle(
-                color: Colors.grey.shade700,
-                fontSize: 15,
-              ),
+              _email ?? _username ?? "Không có email",
+              style: const TextStyle(color: Colors.grey),
             ),
+            const Divider(height: 30, thickness: 1),
 
-            const SizedBox(height: 6),
+            _buildInfoRow(Icons.phone, "Số điện thoại",
+                _phoneCtrl.text.isNotEmpty ? _phoneCtrl.text : "Chưa cập nhật"),
+            _buildInfoRow(Icons.calendar_today, "Ngày tạo tài khoản",
+                _createdAt != null ? _createdAt!.split('T')[0] : "Chưa có"),
+            _buildInfoRow(Icons.account_balance_wallet, "Số lượng ví",
+                _walletCount != null ? "$_walletCount ví" : "Đang tải..."),
+            _buildInfoRow(Icons.attach_money, "Tổng số dư",
+                _totalBalance != null ? _formatMoney(_totalBalance!) : "Đang tải..."),
 
-            if (createdAt != null)
-              Text(
-                "Tham gia từ: ${getJoinDate(createdAt!)}",
-                style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontSize: 13,
-                ),
-              ),
-
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
 
             TextField(
-              controller: nameController,
-              decoration: InputDecoration(
+              controller: _nameCtrl,
+              decoration: const InputDecoration(
                 labelText: "Họ tên",
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
+                border: OutlineInputBorder(),
               ),
             ),
-
-            const SizedBox(height: 14),
-
+            const SizedBox(height: 10),
             TextField(
-              controller: phoneController,
-              decoration: InputDecoration(
-                labelText: "Số điện thoại",
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
+              controller: _phoneCtrl,
               keyboardType: TextInputType.phone,
+              decoration: const InputDecoration(
+                labelText: "Số điện thoại",
+                border: OutlineInputBorder(),
+              ),
             ),
 
-            const SizedBox(height: 28),
-
+            const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: saveProfile,
+              onPressed: _isLoading ? null : _updateProfile,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 14, horizontal: 40),
+                backgroundColor: const Color(0xffF4C97D),
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
+                    borderRadius: BorderRadius.circular(10)),
               ),
-              child: const Text(
-                "Lưu thay đổi",
-                style: TextStyle(color: Colors.white, fontSize: 16),
-              ),
+              child: _isLoading
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text("Cập nhật thông tin",
+                      style: TextStyle(fontWeight: FontWeight.bold)),
             ),
 
-            const SizedBox(height: 16),
-
+            const SizedBox(height: 15),
             OutlinedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const ChangePasswordScreen()),
-                );
-              },
+              onPressed: () => Navigator.pushNamed(context, '/change-password'),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: Colors.orange),
-                padding:
-                    const EdgeInsets.symmetric(vertical: 12, horizontal: 40),
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
+                    borderRadius: BorderRadius.circular(10)),
               ),
-              child: const Text(
-                "Đổi mật khẩu",
-                style: TextStyle(color: Colors.orange),
-              ),
+              child: const Text("Đổi mật khẩu",
+                  style: TextStyle(color: Colors.orange)),
             ),
+            const SizedBox(height: 15),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.orangeAccent),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(color: Colors.black54, fontSize: 13)),
+                Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

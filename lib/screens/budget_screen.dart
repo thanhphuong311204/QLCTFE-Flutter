@@ -8,6 +8,8 @@ import 'package:qlctfe/models/wallet_model.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'budget_chart_screen.dart';
+import 'budget_calendar_screen.dart';
 
 class BudgetScreen extends StatefulWidget {
   const BudgetScreen({Key? key}) : super(key: key);
@@ -57,7 +59,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                     decoration: const InputDecoration(labelText: "Danh mục"),
                     value: selectedCategory,
                     items: categories
-                        .where((c) => c.type == "expense") // chỉ lấy loại chi tiêu
+                        .where((c) => c.type == "expense")
                         .map((c) => DropdownMenuItem(
                               value: c,
                               child: Text(c.categoryName),
@@ -134,6 +136,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
     }
   }
 
+  // 🧾 Hiển thị 1 thẻ ngân sách
   Widget _buildBudgetCard(Budget budget) {
     final percent = (budget.spentAmount / budget.amountLimit).clamp(0, 1);
     final progressColor = percent >= 0.9
@@ -175,50 +178,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
     );
   }
 
-  
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Ngân sách"),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.bar_chart_outlined),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.calendar_month_outlined),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: _showAddBudgetDialog,
-          ),
-        ],
-      ),
-      body: FutureBuilder<List<Budget>>(
-        future: _budgetsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text("Lỗi: ${snapshot.error}"));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("Chưa có ngân sách nào"));
-          }
-
-          final budgets = snapshot.data!;
-          return ListView.builder(
-            itemCount: budgets.length,
-            itemBuilder: (context, index) =>
-                _buildBudgetCard(budgets[index]),
-          );
-        },
-      ),
-    );
-  }
-
+  // 🔹 Lấy danh mục từ backend
   Future<List<CategoryModel>> fetchCategories() async {
     final token = await SecureStorage().getToken();
     final res = await http.get(
@@ -234,7 +194,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
     }
   }
 
-  
+  // 🔹 Lấy ví từ backend
   Future<List<Wallet>> fetchWallets() async {
     final token = await SecureStorage().getToken();
     final res = await http.get(
@@ -247,5 +207,73 @@ class _BudgetScreenState extends State<BudgetScreen> {
     } else {
       throw Exception("Lỗi tải ví: ${res.statusCode}");
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Ngân sách"),
+        centerTitle: true,
+        actions: [
+          // 📊 Nút xem biểu đồ ngân sách
+          IconButton(
+            icon: const Icon(Icons.bar_chart_outlined),
+            tooltip: "Xem biểu đồ ngân sách",
+            onPressed: () async {
+              final budgets = await _budgetsFuture;
+              if (!context.mounted) return;
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => BudgetChartScreen(budgets: budgets),
+                ),
+              );
+            },
+          ),
+
+          // 📅 Nút xem lịch ngân sách
+          IconButton(
+            icon: const Icon(Icons.calendar_month_outlined),
+            tooltip: "Xem ngân sách theo tháng",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const BudgetCalendarScreen(),
+                ),
+              );
+            },
+          ),
+
+          // ➕ Nút thêm ngân sách
+          IconButton(
+            icon: const Icon(Icons.add),
+            tooltip: "Thêm ngân sách mới",
+            onPressed: _showAddBudgetDialog,
+          ),
+        ],
+      ),
+
+      // 📋 Danh sách ngân sách
+      body: FutureBuilder<List<Budget>>(
+        future: _budgetsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text("Lỗi: ${snapshot.error}"));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text("Chưa có ngân sách nào"));
+          }
+
+          final budgets = snapshot.data!;
+          return ListView.builder(
+            itemCount: budgets.length,
+            itemBuilder: (context, index) => _buildBudgetCard(budgets[index]),
+          );
+        },
+      ),
+    );
   }
 }
