@@ -187,7 +187,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
           },
         ),
 
-        // ❗❗❗ CHỖ SỬA SỐ 1 — TRUYỀN CONTEXT
 Builder(
   builder: (appBarContext) {
     return IconButton(

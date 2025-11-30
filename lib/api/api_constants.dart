@@ -1,6 +1,7 @@
 class ApiConstants {
   static const String baseUrl = "http://192.168.1.107:8080";
 
+
   static const String register = "$baseUrl/api/auth/register";
   static const String login = "$baseUrl/api/auth/login";
   static const String categories = "$baseUrl/api/categories";
@@ -31,5 +32,8 @@ class ApiConstants {
   static const String getCurrentUser = "$baseUrl/api/users/me";
 
   static const String users = "$baseUrl/api/users";
+
+  static const String aiSuggest = "$baseUrl/api/ai/suggest-category";
+
 
 }
