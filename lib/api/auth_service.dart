@@ -52,7 +52,6 @@ class AuthService {
         }
 
         final storage = SecureStorage();
-
         await storage.saveToken(rawToken);
 
         return true;
@@ -74,5 +73,25 @@ class AuthService {
   Future<void> logout() async {
     final storage = SecureStorage();
     await storage.deleteAll();
+  }
+
+  // ⭐⭐ THÊM: Lấy user hiện tại từ backend
+  Future<Map<String, dynamic>?> getProfile() async {
+    final storage = SecureStorage();
+    final token = await storage.getToken();
+    if (token == null) return null;
+
+    final url = Uri.parse("${ApiConstants.baseUrl}/api/user/profile");
+
+    final response = await http.get(
+      url,
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    }
+
+    return null;
   }
 }

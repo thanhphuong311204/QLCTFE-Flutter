@@ -3,6 +3,7 @@ import 'package:qlctfe/api/auth_service.dart';
 import 'package:qlctfe/api/category_service.dart';
 import 'package:qlctfe/api/notification_service.dart';
 import 'package:qlctfe/models/category_model.dart';
+import 'package:qlctfe/screens/ai/ai_predict_screen.dart';
 import 'package:qlctfe/screens/budget_screen.dart';
 import 'package:qlctfe/screens/expense_dashboard_screen.dart';
 import 'package:qlctfe/screens/goal_screen.dart';
@@ -187,15 +188,15 @@ class _CategoryScreenState extends State<CategoryScreen> {
           },
         ),
 
-Builder(
-  builder: (appBarContext) {
-    return IconButton(
-      tooltip: "Menu",
-      icon: const Icon(Icons.more_vert),
-      onPressed: () => _openMenuSheet(appBarContext),
-    );
-  },
-),
+        Builder(
+          builder: (appBarContext) {
+            return IconButton(
+              tooltip: "Menu",
+              icon: const Icon(Icons.more_vert),
+              onPressed: () => _openMenuSheet(appBarContext),
+            );
+          },
+        ),
       ],
       bottom: const TabBar(
         labelColor: Colors.orange,
@@ -209,97 +210,121 @@ Builder(
     );
   }
 
-void _openMenuSheet(BuildContext parentContext) {
-  showModalBottomSheet(
-    context: parentContext,
-    backgroundColor: Colors.white,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
-    builder: (sheetContext) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _menuItem(Icons.bar_chart, "Thống kê", () {
-              Navigator.pop(sheetContext);
+  void _openMenuSheet(BuildContext parentContext) {
+    showModalBottomSheet(
+      context: parentContext,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) {
+        return SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
 
-              // ❗ LẤY TAB TỪ parentContext
-              final controller = DefaultTabController.of(parentContext);
-              final index = controller?.index ?? 0;
+                _menuItem(Icons.bar_chart, "Thống kê", () {
+                  Navigator.pop(sheetContext);
 
-              final target = index == 0
-                  ? const ExpenseDashboardScreen()
-                  : const IncomeDashboardScreen();
+                  final controller = DefaultTabController.of(parentContext);
+                  final index = controller?.index ?? 0;
 
-              // ❗ PUSH TỪ parentContext (context gốc)
-              Navigator.push(
-                parentContext,
-                MaterialPageRoute(builder: (_) => target),
-              );
-            }),
+                  final target = index == 0
+                      ? const ExpenseDashboardScreen()
+                      : const IncomeDashboardScreen();
 
-            _menuItem(Icons.insert_chart, "Báo cáo tổng hợp", () {
-              Navigator.pop(sheetContext);
-              _requireLogin(() => Navigator.push(
+                  Navigator.push(
                     parentContext,
-                    MaterialPageRoute(builder: (_) => const ReportScreen()),
-                  ));
-            }),
+                    MaterialPageRoute(builder: (_) => target),
+                  );
+                }),
 
-            _menuItem(Icons.autorenew, "Giao dịch định kỳ", () {
-              Navigator.pop(sheetContext);
-              _requireLogin(() => Navigator.push(
-                    parentContext,
-                    MaterialPageRoute(builder: (_) => const RecurringScreen()),
-                  ));
-            }),
+                _menuItem(Icons.insert_chart, "Báo cáo tổng hợp", () {
+                  Navigator.pop(sheetContext);
+                  _requireLogin(() => Navigator.push(
+                        parentContext,
+                        MaterialPageRoute(builder: (_) => const ReportScreen()),
+                      ));
+                }),
 
-            _menuItem(Icons.history, "Lịch sử giao dịch", () {
-              Navigator.pop(sheetContext);
-              _requireLogin(() => Navigator.push(
-                    parentContext,
-                    MaterialPageRoute(
-                        builder: (_) => const TransactionHistoryScreen()),
-                  ));
-            }),
+                // ⭐⭐⭐ THAY ĐOẠN NÀY — LẤY USERID THẬT ⭐⭐⭐
+                _menuItem(Icons.auto_awesome, "AI dự đoán chi tiêu", () async {
+                  Navigator.pop(sheetContext);
 
-            _menuItem(Icons.account_balance_wallet, "Ví", () {
-              Navigator.pop(sheetContext);
-              _requireLogin(() => Navigator.push(
-                    parentContext,
-                    MaterialPageRoute(builder: (_) => const WalletScreen()),
-                  ));
-            }),
+                  final profile = await _auth.getProfile();
+                  final userId = profile?["id"]; // lấy userId từ backend
 
-            _menuItem(Icons.flag_outlined, "Mục tiêu", () {
-              Navigator.pop(sheetContext);
-              _requireLogin(() => Navigator.push(
-                    parentContext,
-                    MaterialPageRoute(builder: (_) => const GoalScreen()),
-                  ));
-            }),
+                  if (userId == null) {
+                    print("❌ Không lấy được userId");
+                    return;
+                  }
 
-            _menuItem(Icons.account_balance, "Ngân sách", () {
-              Navigator.pop(sheetContext);
-              _requireLogin(() => Navigator.push(
-                    parentContext,
-                    MaterialPageRoute(builder: (_) => const BudgetScreen()),
-                  ));
-            }),
+                  _requireLogin(() {
+                    Navigator.push(
+                      parentContext,
+                      MaterialPageRoute(
+                        builder: (_) => AIPredictScreen(userId: userId),
+                      ),
+                    );
+                  });
+                }),
 
-            const Divider(height: 25),
-            _menuItem(Icons.logout, "Đăng xuất", () async {
-              Navigator.pop(sheetContext);
-              await _logout();
-            }),
-          ],
-        ),
-      );
-    },
-  );
-}
+                _menuItem(Icons.autorenew, "Giao dịch định kỳ", () {
+                  Navigator.pop(sheetContext);
+                  _requireLogin(() => Navigator.push(
+                        parentContext,
+                        MaterialPageRoute(
+                            builder: (_) => const RecurringScreen()),
+                      ));
+                }),
+
+                _menuItem(Icons.history, "Lịch sử giao dịch", () {
+                  Navigator.pop(sheetContext);
+                  _requireLogin(() => Navigator.push(
+                        parentContext,
+                        MaterialPageRoute(
+                            builder: (_) => const TransactionHistoryScreen()),
+                      ));
+                }),
+
+                _menuItem(Icons.account_balance_wallet, "Ví", () {
+                  Navigator.pop(sheetContext);
+                  _requireLogin(() => Navigator.push(
+                        parentContext,
+                        MaterialPageRoute(builder: (_) => const WalletScreen()),
+                      ));
+                }),
+
+                _menuItem(Icons.flag_outlined, "Mục tiêu", () {
+                  Navigator.pop(sheetContext);
+                  _requireLogin(() => Navigator.push(
+                        parentContext,
+                        MaterialPageRoute(builder: (_) => const GoalScreen()),
+                      ));
+                }),
+
+                _menuItem(Icons.account_balance, "Ngân sách", () {
+                  Navigator.pop(sheetContext);
+                  _requireLogin(() => Navigator.push(
+                        parentContext,
+                        MaterialPageRoute(builder: (_) => const BudgetScreen()),
+                      ));
+                }),
+
+                const Divider(height: 25),
+                _menuItem(Icons.logout, "Đăng xuất", () async {
+                  Navigator.pop(sheetContext);
+                  await _logout();
+                }),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   Widget _menuItem(IconData icon, String text, VoidCallback onTap) {
     return ListTile(
@@ -389,12 +414,19 @@ void _openMenuSheet(BuildContext parentContext) {
         final defaultExpense = list.firstWhere(
           (c) => c.type == "expense" && c.categoryName == "Chi tiêu khác",
           orElse: () => CategoryModel(
-              categoryId: 1, categoryName: "Chi tiêu khác", type: "expense"),
+            categoryId: 1,
+            categoryName: "Chi tiêu khác",
+            type: "expense",
+          ),
         );
+
         final defaultIncome = list.firstWhere(
           (c) => c.type == "income" && c.categoryName == "Thu nhập khác",
           orElse: () => CategoryModel(
-              categoryId: 2, categoryName: "Thu nhập khác", type: "income"),
+            categoryId: 2,
+            categoryName: "Thu nhập khác",
+            type: "income",
+          ),
         );
 
         return Padding(
@@ -406,27 +438,36 @@ void _openMenuSheet(BuildContext parentContext) {
                 "Nhập khoản chi",
                 Icons.remove_circle_outline,
                 Colors.redAccent,
-                () => _requireLogin(() => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => TransactionFormScreen(
-                                isExpense: true,
-                                categoryId: defaultExpense.categoryId,
-                                categoryName: defaultExpense.categoryName,
-                              )))),
+                () => _requireLogin(
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => TransactionFormScreen(
+                        isExpense: true,
+                        categoryId: defaultExpense.categoryId,
+                        categoryName: defaultExpense.categoryName,
+                      ),
+                    ),
+                  ),
+                ),
               ),
+
               _buildActionButton(
                 "Nhập khoản thu",
                 Icons.add_circle_outline,
                 Colors.green,
-                () => _requireLogin(() => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => TransactionFormScreen(
-                                isExpense: false,
-                                categoryId: defaultIncome.categoryId,
-                                categoryName: defaultIncome.categoryName,
-                              )))),
+                () => _requireLogin(
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => TransactionFormScreen(
+                        isExpense: false,
+                        categoryId: defaultIncome.categoryId,
+                        categoryName: defaultIncome.categoryName,
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),

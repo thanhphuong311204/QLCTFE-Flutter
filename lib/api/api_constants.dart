@@ -35,5 +35,6 @@ class ApiConstants {
 
   static const String aiSuggest = "$baseUrl/api/ai/suggest-category";
 
+  static const String aiPredict = "$baseUrl/api/ai/predict-spending";
 
 }
