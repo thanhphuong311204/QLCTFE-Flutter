@@ -1,0 +1,158 @@
+{
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "add": "Add",
+    "create": "Create",
+    "update": "Update",
+    "delete": "Delete",
+    "next": "Next",
+    "back": "Back",
+    "money_unit": "₫",
+    "vnd": "VND"
+  },
+  "category_screen": {
+    "title": "Category",
+    "expense_tab": "Expense",
+    "income_tab": "Income",
+    "add_expense": "Add expense",
+    "add_income": "Add income",
+    "food": "Food & Dining",
+    "coffee_drink": "Coffee / Drinks",
+    "supermarket": "Supermarket / Groceries",
+    "shopping": "Clothing & Shopping",
+    "transport": "Transportation / Taxi",
+    "housing": "Housing",
+    "rent_service": "Service Fee / Apartment",
+    "education": "Education",
+    "health": "Health / Medical",
+    "pet": "Pets",
+    "entertainment": "Entertainment",
+    "technology": "Technology",
+    "travel": "Travel",
+    "family": "Family / Children",
+    "gift": "Gifts",
+    "repair": "Repair / Decoration",
+    "nutrition": "Nutrition",
+    "fuel": "Fuel / Gasoline",
+    "other": "Others",
+    "park": "Go to park"
+  },
+  "income_category": {
+    "salary": "Salary",
+    "bonus": "Bonus",
+    "investment": "Investment / Dividend",
+    "rent": "Rental income",
+    "freelance": "Freelance / Project",
+    "received_gift": "Gift received",
+    "business": "Business",
+    "cashback": "Cashback / Refund",
+    "other_income": "Other income",
+    "transfer": "Transfer received"
+  },
+  "menu": {
+    "statistics": "Statistics",
+    "report": "Summary Report",
+    "ai_predict": "AI Spending Prediction",
+    "recurring": "Recurring Transactions",
+    "transaction_history": "Transaction History",
+    "wallet": "Wallets",
+    "goal": "Goals",
+    "budget": "Budget",
+    "logout": "Logout"
+  },
+  "profile": {
+    "title": "Profile",
+    "name": "Full name",
+    "phone": "Phone number",
+    "email": "Email",
+    "wallet_count": "Number of wallets",
+    "balance": "Total balance",
+    "created_date": "Account created",
+    "update_info": "Update information",
+    "change_password": "Change password"
+  },
+  "statistics": {
+    "income_stat": "Income Statistics",
+    "total_income": "Total Income",
+    "distribution": "Income distribution by category",
+    "category": "Category"
+  },
+  "report": {
+    "title": "Report & Statistics",
+    "choose_year": "Select year",
+    "total_income": "Total income",
+    "total_expense": "Total expense",
+    "new_report": "Create new report",
+    "report_type": "Report type",
+    "weekly": "Weekly report",
+    "monthly": "Monthly report",
+    "yearly": "Yearly report"
+  },
+  "ai_predict": {
+    "title": "AI Spending Prediction",
+    "this_month_predict": "This month's prediction",
+    "spent": "Spent",
+    "weekly_spending": "Weekly spending (AI analysis)",
+    "stable_spending": "Stable spending",
+    "good_spending": "You are spending reasonably."
+  },
+  "recurring_transaction": {
+    "title": "Recurring Transactions",
+    "amount": "Amount",
+    "category": "Category",
+    "repeat": "Repeat",
+    "next_date": "Next date",
+    "create_title": "Create recurring transaction",
+    "note": "Note",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "yearly": "Yearly"
+  },
+  "transaction_history": {
+    "title": "Transaction History",
+    "wallet": "Wallet"
+  },
+  "wallet": {
+    "title": "Wallet List",
+    "add_wallet": "Add new wallet",
+    "wallet_name": "Wallet name",
+    "balance": "Balance",
+    "type": "Wallet type",
+    "cash": "Cash",
+    "ewallet": "E-Wallet"
+  },
+  "goal": {
+    "title": "Financial Goals",
+    "add_goal": "Add new goal",
+    "goal_name": "Goal name",
+    "target_amount": "Target amount",
+    "select_wallet": "Select wallet",
+    "select_category": "Select category",
+    "no_deadline": "No deadline",
+    "update_progress": "Update progress",
+    "input_amount": "Enter amount to add (₫)"
+  },
+  "budget": {
+    "budget_calendar": "Budget Calendar",
+    "budget_for_month": "Budget for {0}",
+    "no_budget_this_month": "No budget this month",
+    "spent_label": "Spent",
+    "limit_label": "Limit"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "currency": "Currency",
+    "notifications": "Notifications",
+    "show_balance": "Show balance on home screen",
+    "auto_backup": "Auto backup",
+    "backup_frequency": "Backup frequency",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "reminder_time": "Reminder time",
+    "save": "Save"
+  }
+}

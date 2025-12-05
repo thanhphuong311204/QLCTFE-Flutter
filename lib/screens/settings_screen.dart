@@ -1,6 +1,8 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:qlctfe/api/setting_service.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -31,10 +33,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> loadSettings() async {
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedLang = prefs.getString('language');
+      if (savedLang != null) {
+        language = savedLang;
+        await context.setLocale(Locale(savedLang));
+      }
+
       final data = await _service.getSettings();
 
       setState(() {
-        language = data["language"] ?? "vi";
+        language = data["language"] ?? language;
         currency = data["currency"] ?? "VND";
         notificationEnabled = data["notificationEnabled"] == true;
         showBalance = data["showBalanceOnHome"] == true;
@@ -43,8 +52,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
         if (data["reminderTime"] != null) {
           final t = data["reminderTime"].split(":");
-          reminderTime =
-              TimeOfDay(hour: int.parse(t[0]), minute: int.parse(t[1]));
+          reminderTime = TimeOfDay(
+            hour: int.parse(t[0]),
+            minute: int.parse(t[1]),
+          );
         }
 
         loading = false;
@@ -71,43 +82,63 @@ class _SettingsScreenState extends State<SettingsScreen> {
       await _service.updateSettings(map);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("✔ Đã lưu")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("✔ Đã lưu")));
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("❌ Lỗi lưu: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("❌ Lỗi lưu: $e")));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     if (loading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Cài đặt"),
+        title: Text("settings.title".tr()),
         backgroundColor: Colors.orange.shade200,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text("Ngôn ngữ", style: TextStyle(fontWeight: FontWeight.bold)),
+          Text("settings.language".tr(),
+              style: const TextStyle(fontWeight: FontWeight.bold)),
           _dropdown(
             value: language,
             items: const {"vi": "Tiếng Việt", "en": "English"},
-            onChanged: (v) => setState(() => language = v!),
+            onChanged: (v) async {
+              if (v == null) return;
+              setState(() => language = v);
+
+              // 🔥 Chỉ cần gọi 1 lần duy nhất
+              await context.setLocale(Locale(v));
+
+              // Lưu lại lựa chọn
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setString('language', v);
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    '✅ Ngôn ngữ đã đổi thành ${v == "vi" ? "Tiếng Việt" : "English"}',
+                  ),
+                ),
+              );
+            },
           ),
 
           const SizedBox(height: 14),
 
-          const Text("Đơn vị tiền tệ", style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            "settings.currency".tr(),
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
           _dropdown(
             value: currency,
             items: const {"VND": "VND", "USD": "USD"},
@@ -116,19 +147,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const SizedBox(height: 20),
 
-          _switch("Thông báo", notificationEnabled,
-              (v) => setState(() => notificationEnabled = v)),
+          _switch(
+            "settings.notifications".tr(),
+            notificationEnabled,
+            (v) => setState(() => notificationEnabled = v),
+          ),
 
-          _switch("Hiện số dư ở trang chủ", showBalance,
-              (v) => setState(() => showBalance = v)),
+          _switch(
+            "settings.show_balance".tr(),
+            showBalance,
+            (v) => setState(() => showBalance = v),
+          ),
 
-          _switch("Tự động sao lưu", autoBackup,
-              (v) => setState(() => autoBackup = v)),
+          _switch(
+            "settings.auto_backup".tr(),
+            autoBackup,
+            (v) => setState(() => autoBackup = v),
+          ),
 
           if (autoBackup)
             _dropdown(
               value: backupFrequency,
-              items: const {
+              items: {
                 "daily": "Hàng ngày",
                 "weekly": "Hàng tuần",
                 "monthly": "Hàng tháng",
@@ -138,11 +178,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const SizedBox(height: 20),
 
-          const Text("Giờ nhắc nhở",
-              style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            "settings.reminder_time".tr(),
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
           ListTile(
             title: Text(
-              "${reminderTime.format(context)}",
+              reminderTime.format(context),
               style: const TextStyle(fontSize: 16),
             ),
             trailing: const Icon(Icons.timer),
@@ -168,8 +210,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text("Lưu",
-                style: TextStyle(color: Colors.white, fontSize: 16)),
+            child: Text(
+              "common.save".tr(),
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+            ),
           ),
         ],
       ),
@@ -189,10 +233,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           isExpanded: true,
           underline: const SizedBox(),
           items: items.entries
-              .map((e) => DropdownMenuItem(
-                    value: e.key,
-                    child: Text(e.value),
-                  ))
+              .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value)))
               .toList(),
           onChanged: onChanged,
         ),

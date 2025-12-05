@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:qlctfe/api/budget_service.dart';
 import 'package:qlctfe/api/secure_storage.dart';
@@ -123,7 +124,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                     _budgetsFuture = _budgetService.fetchBudgets();
                   });
                 },
-                child: const Text("Lưu"),
+                child:  Text("settings.save".tr()),
               ),
             ],
           );

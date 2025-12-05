@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:qlctfe/api/auth_service.dart';
 import 'package:qlctfe/api/category_service.dart';
@@ -74,9 +75,9 @@ class _CategoryScreenState extends State<CategoryScreen> {
     await _auth.logout();
     if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("🚪 Đã đăng xuất.")),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("🚪 Đã đăng xuất.")));
 
     setState(() {});
   }
@@ -120,9 +121,9 @@ class _CategoryScreenState extends State<CategoryScreen> {
     return AppBar(
       backgroundColor: Colors.orange.shade100,
       elevation: 0,
-      title: const Text(
-        "Danh mục",
-        style: TextStyle(
+      title: Text(
+        'category_screen.title'.tr(),
+        style: const TextStyle(
           fontWeight: FontWeight.w700,
           color: Colors.black87,
         ),
@@ -224,7 +225,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-
                 _menuItem(Icons.bar_chart, "Thống kê", () {
                   Navigator.pop(sheetContext);
 
@@ -243,18 +243,19 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
                 _menuItem(Icons.insert_chart, "Báo cáo tổng hợp", () {
                   Navigator.pop(sheetContext);
-                  _requireLogin(() => Navigator.push(
-                        parentContext,
-                        MaterialPageRoute(builder: (_) => const ReportScreen()),
-                      ));
+                  _requireLogin(
+                    () => Navigator.push(
+                      parentContext,
+                      MaterialPageRoute(builder: (_) => const ReportScreen()),
+                    ),
+                  );
                 }),
 
-                // ⭐⭐⭐ THAY ĐOẠN NÀY — LẤY USERID THẬT ⭐⭐⭐
                 _menuItem(Icons.auto_awesome, "AI dự đoán chi tiêu", () async {
                   Navigator.pop(sheetContext);
 
                   final profile = await _auth.getProfile();
-                  final userId = profile?["id"]; // lấy userId từ backend
+                  final userId = profile?["id"];
 
                   if (userId == null) {
                     print("❌ Không lấy được userId");
@@ -273,44 +274,56 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
                 _menuItem(Icons.autorenew, "Giao dịch định kỳ", () {
                   Navigator.pop(sheetContext);
-                  _requireLogin(() => Navigator.push(
-                        parentContext,
-                        MaterialPageRoute(
-                            builder: (_) => const RecurringScreen()),
-                      ));
+                  _requireLogin(
+                    () => Navigator.push(
+                      parentContext,
+                      MaterialPageRoute(
+                        builder: (_) => const RecurringScreen(),
+                      ),
+                    ),
+                  );
                 }),
 
                 _menuItem(Icons.history, "Lịch sử giao dịch", () {
                   Navigator.pop(sheetContext);
-                  _requireLogin(() => Navigator.push(
-                        parentContext,
-                        MaterialPageRoute(
-                            builder: (_) => const TransactionHistoryScreen()),
-                      ));
+                  _requireLogin(
+                    () => Navigator.push(
+                      parentContext,
+                      MaterialPageRoute(
+                        builder: (_) => const TransactionHistoryScreen(),
+                      ),
+                    ),
+                  );
                 }),
 
                 _menuItem(Icons.account_balance_wallet, "Ví", () {
                   Navigator.pop(sheetContext);
-                  _requireLogin(() => Navigator.push(
-                        parentContext,
-                        MaterialPageRoute(builder: (_) => const WalletScreen()),
-                      ));
+                  _requireLogin(
+                    () => Navigator.push(
+                      parentContext,
+                      MaterialPageRoute(builder: (_) => const WalletScreen()),
+                    ),
+                  );
                 }),
 
                 _menuItem(Icons.flag_outlined, "Mục tiêu", () {
                   Navigator.pop(sheetContext);
-                  _requireLogin(() => Navigator.push(
-                        parentContext,
-                        MaterialPageRoute(builder: (_) => const GoalScreen()),
-                      ));
+                  _requireLogin(
+                    () => Navigator.push(
+                      parentContext,
+                      MaterialPageRoute(builder: (_) => const GoalScreen()),
+                    ),
+                  );
                 }),
 
                 _menuItem(Icons.account_balance, "Ngân sách", () {
                   Navigator.pop(sheetContext);
-                  _requireLogin(() => Navigator.push(
-                        parentContext,
-                        MaterialPageRoute(builder: (_) => const BudgetScreen()),
-                      ));
+                  _requireLogin(
+                    () => Navigator.push(
+                      parentContext,
+                      MaterialPageRoute(builder: (_) => const BudgetScreen()),
+                    ),
+                  );
                 }),
 
                 const Divider(height: 25),
@@ -329,8 +342,10 @@ class _CategoryScreenState extends State<CategoryScreen> {
   Widget _menuItem(IconData icon, String text, VoidCallback onTap) {
     return ListTile(
       leading: Icon(icon, size: 28, color: Colors.orange.shade700),
-      title: Text(text,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+      title: Text(
+        text,
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+      ),
       onTap: onTap,
     );
   }
@@ -348,8 +363,8 @@ class _CategoryScreenState extends State<CategoryScreen> {
         final cat = list[i];
         return InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () => _requireLogin(() {
-            Navigator.push(
+          onTap: () => _requireLogin(() async {
+            final result = await Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (_) => TransactionFormScreen(
@@ -359,6 +374,9 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 ),
               ),
             );
+            if (result == "refresh") {
+              _loadUnreadNotifications();
+            }
           }),
           child: Container(
             decoration: BoxDecoration(
@@ -381,8 +399,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                   width: 42,
                   fit: BoxFit.contain,
                   errorBuilder: (_, __, ___) =>
-                      const Icon(Icons.image_not_supported,
-                          color: Colors.grey),
+                      const Icon(Icons.image_not_supported, color: Colors.grey),
                 ),
                 const SizedBox(height: 8),
                 Padding(
@@ -393,7 +410,9 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                        fontWeight: FontWeight.w600, fontSize: 13),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
               ],
@@ -438,8 +457,8 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 "Nhập khoản chi",
                 Icons.remove_circle_outline,
                 Colors.redAccent,
-                () => _requireLogin(
-                  () => Navigator.push(
+                () => _requireLogin(() async {
+                  final result = await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (_) => TransactionFormScreen(
@@ -448,16 +467,20 @@ class _CategoryScreenState extends State<CategoryScreen> {
                         categoryName: defaultExpense.categoryName,
                       ),
                     ),
-                  ),
-                ),
+                  );
+
+                  if (result == "refresh") {
+                    _loadUnreadNotifications();
+                  }
+                }),
               ),
 
               _buildActionButton(
                 "Nhập khoản thu",
                 Icons.add_circle_outline,
                 Colors.green,
-                () => _requireLogin(
-                  () => Navigator.push(
+                () => _requireLogin(() async {
+                  final result = await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (_) => TransactionFormScreen(
@@ -466,8 +489,12 @@ class _CategoryScreenState extends State<CategoryScreen> {
                         categoryName: defaultIncome.categoryName,
                       ),
                     ),
-                  ),
-                ),
+                  );
+
+                  if (result == "refresh") {
+                    _loadUnreadNotifications();
+                  }
+                }),
               ),
             ],
           ),

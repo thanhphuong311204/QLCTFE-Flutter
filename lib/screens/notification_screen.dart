@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:qlctfe/api/notification_service.dart';
 
@@ -34,7 +35,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFFCF8F3),
       appBar: AppBar(
-        title: const Text("Thông báo"),
+        title: Text("settings.notifications".tr()),
         backgroundColor: Colors.orange.shade100,
       ),
       body: FutureBuilder(
@@ -72,14 +73,18 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       size: 28,
                     ),
                     title: Text(
-                      n["notificationTitle"],
+                      (n["notificationTitle"] ?? "").toString(),
                       style: TextStyle(
-                        fontWeight: isRead ? FontWeight.normal : FontWeight.bold,
+                        fontWeight: isRead
+                            ? FontWeight.normal
+                            : FontWeight.bold,
                       ),
                     ),
-                    subtitle: Text(n["notificationMessage"]),
+                    subtitle: Text(
+                      (n["notificationMessage"] ?? "").toString(),
+                      style: const TextStyle(color: Colors.black54),
+                    ),
 
-                    // 🔥🔥🔥 NHẤN VÀO THÔNG BÁO ĐỂ ĐIỀU HƯỚNG
                     onTap: () {
                       final refType = n["referenceType"];
                       final refId = n["referenceId"];
@@ -87,7 +92,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
                       if (refType == null) return;
 
-                      // EXPENSE → mở lịch sử giao dịch
                       if (refType == "EXPENSE") {
                         Navigator.push(
                           context,
@@ -133,7 +137,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
                         if (value == "read") {
                           await _service.markAsRead(n["notificationId"]);
                         } else {
-                          await _service.deleteNotification(n["notificationId"]);
+                          await _service.deleteNotification(
+                            n["notificationId"],
+                          );
                         }
                         _refresh();
                       },

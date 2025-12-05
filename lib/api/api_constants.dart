@@ -1,6 +1,6 @@
 class ApiConstants {
-  static const String baseUrl = "http://192.168.1.107:8080";
-
+  static const String baseUrl = "http://192.168.31.229:8080";
+  // static const String baseUrl = "http://10.0.2.2:8080";
 
   static const String register = "$baseUrl/api/auth/register";
   static const String login = "$baseUrl/api/auth/login";
@@ -26,6 +26,8 @@ class ApiConstants {
   static const String recurring = "$baseUrl/api/recurring";
 
   static const String notifications = "$baseUrl/api/notifications";
+
+  static const String readAllNotification = "$baseUrl/api/notifications/read-all";
   
   static const String settings = "$baseUrl/api/settings";
 
@@ -36,5 +38,7 @@ class ApiConstants {
   static const String aiSuggest = "$baseUrl/api/ai/suggest-category";
 
   static const String aiPredict = "$baseUrl/api/ai/predict-spending";
+
+  static const String loginBio = "$baseUrl/api/auth/login-bio";
 
 }

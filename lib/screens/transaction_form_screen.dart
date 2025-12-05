@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:qlctfe/api/notification_service.dart';
 import '../api/transaction_service.dart';
 import '../api/wallet_service.dart';
 import '../api/ai_service.dart';
@@ -35,6 +36,7 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
   final WalletService _walletService = WalletService();
   final AIService _aiService = AIService();
   final CategoryService _categoryService = CategoryService();
+  final NotificationService _notificationService = NotificationService();
 
   List<Wallet> _wallets = [];
   Wallet? _selectedWallet;
@@ -79,9 +81,9 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
         _selectedWallet = wallets.isNotEmpty ? wallets.first : null;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("❌ Không thể tải ví: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("❌ Không thể tải ví: $e")));
     }
   }
 
@@ -102,11 +104,13 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
     setState(() => _loadingAI = true);
 
     try {
-      final res = await _aiService.suggestCategory(text.trim());
-
-    setState(() {
-  _aiSuggestions = [ res["category"] ?? "Khác" ];
-});
+      final res = await _aiService.suggestCategory(
+        text.trim(),
+        widget.isExpense,
+      );
+      setState(() {
+        _aiSuggestions = [res["category"] ?? "Khác"];
+      });
     } catch (e) {
       _aiSuggestions = [];
     }
@@ -119,14 +123,16 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     if (_selectedWallet == null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("❌ Vui lòng chọn ví")));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("❌ Vui lòng chọn ví")));
       return;
     }
 
     if (widget.categoryId == null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("❌ Chưa chọn danh mục")));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("❌ Chưa chọn danh mục")));
       return;
     }
 
@@ -152,12 +158,13 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
           widget.transaction!.type == "expense",
         );
       }
+      _notificationService.getNotifications();
 
-      Navigator.pop(context, true);
-
+      Navigator.pop(context, "refresh");
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("❌ Lỗi: $e")));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("❌ Lỗi: $e")));
     }
   }
 
@@ -166,8 +173,9 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:
-            Text(widget.transaction == null ? "Thêm giao dịch" : "Sửa giao dịch"),
+        title: Text(
+          widget.transaction == null ? "Thêm giao dịch" : "Sửa giao dịch",
+        ),
         centerTitle: true,
       ),
       body: Padding(
@@ -197,7 +205,10 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
 
               // -------------------- MULTI SUGGESTION UI -------------------
               if (_loadingAI)
-                Text("⏳ AI đang phân tích...", style: TextStyle(color: Colors.grey))
+                Text(
+                  "⏳ AI đang phân tích...",
+                  style: TextStyle(color: Colors.grey),
+                )
               else if (_aiSuggestions.isNotEmpty)
                 Wrap(
                   spacing: 8,
@@ -214,7 +225,9 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
                         });
 
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("✔ Đã chọn: ${matched.categoryName}")),
+                          SnackBar(
+                            content: Text("✔ Đã chọn: ${matched.categoryName}"),
+                          ),
                         );
                       },
                     );
@@ -227,7 +240,9 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("Ngày: ${DateFormat('dd/MM/yyyy').format(_selectedDate)}"),
+                  Text(
+                    "Ngày: ${DateFormat('dd/MM/yyyy').format(_selectedDate)}",
+                  ),
                   TextButton(
                     onPressed: () async {
                       final picked = await showDatePicker(
@@ -266,8 +281,9 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
               ElevatedButton(
                 onPressed: _submitTransaction,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      widget.isExpense ? Colors.redAccent : Colors.green,
+                  backgroundColor: widget.isExpense
+                      ? Colors.redAccent
+                      : Colors.green,
                   padding: EdgeInsets.all(16),
                 ),
                 child: Text(

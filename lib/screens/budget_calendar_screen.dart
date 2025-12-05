@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:qlctfe/api/budget_service.dart';
 import 'package:qlctfe/models/budget_model.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class BudgetCalendarScreen extends StatefulWidget {
   const BudgetCalendarScreen({super.key});
@@ -31,8 +32,10 @@ class _BudgetCalendarScreenState extends State<BudgetCalendarScreen> {
   // 🧩 Lọc ngân sách theo tháng đang chọn
   List<Budget> _filterByMonth(List<Budget> budgets) {
     return budgets.where((b) {
-      final start = DateTime.tryParse(b.startDate?.toString() ?? "") ?? DateTime.now();
-      return start.year == _selectedMonth.year && start.month == _selectedMonth.month;
+      final start =
+          DateTime.tryParse(b.startDate?.toString() ?? "") ?? DateTime.now();
+      return start.year == _selectedMonth.year &&
+          start.month == _selectedMonth.month;
     }).toList();
   }
 
@@ -61,7 +64,7 @@ class _BudgetCalendarScreenState extends State<BudgetCalendarScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Lịch ngân sách")),
+      appBar: AppBar(title: Text("budget.budget_calendar".tr())),
       body: FutureBuilder<List<Budget>>(
         future: _budgetsFuture,
         builder: (context, snapshot) {
@@ -78,7 +81,6 @@ class _BudgetCalendarScreenState extends State<BudgetCalendarScreen> {
 
           return Column(
             children: [
-              // 🗓️ Lịch
               TableCalendar(
                 focusedDay: _focusedDay,
                 firstDay: DateTime.utc(2020, 1, 1),
@@ -87,7 +89,6 @@ class _BudgetCalendarScreenState extends State<BudgetCalendarScreen> {
                 locale: 'vi_VN',
                 selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
 
-                // Khi chọn ngày
                 onDaySelected: (selectedDay, focusedDay) {
                   setState(() {
                     _selectedDay = selectedDay;
@@ -96,7 +97,6 @@ class _BudgetCalendarScreenState extends State<BudgetCalendarScreen> {
                   });
                 },
 
-                // Khi lật sang tháng khác
                 onPageChanged: (focusedDay) {
                   setState(() {
                     _focusedDay = focusedDay;
@@ -104,13 +104,11 @@ class _BudgetCalendarScreenState extends State<BudgetCalendarScreen> {
                   });
                 },
 
-                // Giao diện tiêu đề
                 headerStyle: const HeaderStyle(
                   titleCentered: true,
                   formatButtonVisible: false,
                 ),
 
-                // Giao diện ô ngày
                 calendarStyle: CalendarStyle(
                   todayDecoration: BoxDecoration(
                     color: Colors.orange.shade300,
@@ -127,7 +125,6 @@ class _BudgetCalendarScreenState extends State<BudgetCalendarScreen> {
                   ),
                 ),
 
-                // Dấu chấm chỉ ngày có ngân sách
                 eventLoader: (day) {
                   final date = DateTime(day.year, day.month, day.day);
                   return _events[date] ?? [];
@@ -136,24 +133,27 @@ class _BudgetCalendarScreenState extends State<BudgetCalendarScreen> {
 
               const SizedBox(height: 10),
 
-              // Tiêu đề tháng hiện tại
               Text(
-                "Ngân sách tháng ${DateFormat('MM/yyyy').format(_selectedMonth)}",
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                "budget.budget_for_month".tr(
+                  args: [DateFormat('MM/yyyy').format(_selectedMonth)],
+                ),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
 
               const SizedBox(height: 10),
 
-              // 📋 Danh sách ngân sách tháng
               Expanded(
                 child: monthBudgets.isEmpty
-                    ? const Center(child: Text("Không có ngân sách trong tháng này"))
+                    ? Center(child: Text("budget.no_budget_this_month".tr()))
                     : ListView.builder(
                         itemCount: monthBudgets.length,
                         itemBuilder: (context, index) {
                           final b = monthBudgets[index];
-                          final ratio =
-                              (b.spentAmount / b.amountLimit * 100).clamp(0, 100);
+                          final ratio = (b.spentAmount / b.amountLimit * 100)
+                              .clamp(0, 100);
                           final color = ratio >= 90
                               ? Colors.red
                               : (ratio >= 70 ? Colors.orange : Colors.green);
@@ -162,7 +162,9 @@ class _BudgetCalendarScreenState extends State<BudgetCalendarScreen> {
                             leading: Icon(Icons.circle, color: color, size: 12),
                             title: Text(b.categoryName ?? ""),
                             subtitle: Text(
-                                "Đã chi: ${_formatCurrency(b.spentAmount)} / ${_formatCurrency(b.amountLimit)} (${ratio.toStringAsFixed(1)}%)"),
+                              "${"budget.spent_label".tr()}: ${_formatCurrency(b.spentAmount)} / "
+                              "${_formatCurrency(b.amountLimit)} (${ratio.toStringAsFixed(1)}%)",
+                            ),
                           );
                         },
                       ),

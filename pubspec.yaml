@@ -43,6 +43,8 @@ dependencies:
 
   cupertino_icons: ^1.0.8
 
+  
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -55,5 +57,5 @@ flutter:
     - assets/images/piggy.png
     - assets/icons/expenses/
     - assets/icons/incomes/
-    - assets/lang/en-US.json
-    - assets/lang/vi-VN.json
+    - assets/lang/en.json
+    - assets/lang/vi.json

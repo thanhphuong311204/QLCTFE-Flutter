@@ -12,8 +12,8 @@ class NotificationService {
   Future<List<dynamic>> getNotifications() async {
     final token = await _token();
 
-    final url = "${ApiConstants.baseUrl}/api/notifications";
-    print("URL: $url");
+    final url = "${ApiConstants.notifications}";
+    print("URL moi cua toi la: $url");
 
     final res = await http.get(
       Uri.parse(url),
@@ -41,9 +41,12 @@ class NotificationService {
   Future<void> markAllAsRead() async {
     final token = await _token();
     await http.put(
-      Uri.parse("${ApiConstants.baseUrl}/notifications/read-all"),
+      Uri.parse("${ApiConstants.readAllNotification}"),
       headers: {"Authorization": "Bearer $token"},
     );
+    print (token);
+  
+    print ("toi da goi ham nay");
   }
 
   Future<void> deleteNotification(int id) async {

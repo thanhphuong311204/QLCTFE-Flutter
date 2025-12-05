@@ -5,7 +5,6 @@ import 'package:qlctfe/api/secure_storage.dart';
 import '../models/transaction_model.dart';
 
 class TransactionService {
-  // 🔐 Lấy token từ SecureStorage
   Future<String> _getToken() async {
     final storage = SecureStorage();
     final token = await storage.getToken();
