@@ -1,5 +1,5 @@
 class ApiConstants {
-  static const String baseUrl = "http://192.168.31.229:8080";
+  static const String baseUrl = "http://192.168.1.107:8080";
   // static const String baseUrl = "http://10.0.2.2:8080";
 
   static const String register = "$baseUrl/api/auth/register";
@@ -40,5 +40,7 @@ class ApiConstants {
   static const String aiPredict = "$baseUrl/api/ai/predict-spending";
 
   static const String loginBio = "$baseUrl/api/auth/login-bio";
+  static const String streak = "$baseUrl/api/streak";
+
 
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:qlctfe/api/auth_service.dart';
+import 'package:qlctfe/core/services/streak_provider.dart';
 import 'package:qlctfe/screens/category_screen.dart';
 import 'package:qlctfe/screens/register_screen.dart';
 
@@ -41,9 +43,21 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
 
     if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("🎉 Đăng nhập thành công!")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("🎉 Đăng nhập thành công!")));
+
+      // ⭐ LẤY TOKEN
+      final token = await _authService.getToken();
+
+      if (token != null && token.isNotEmpty) {
+        // ⭐ LOAD STREAK NGAY KHI LOGIN
+        Provider.of<StreakProvider>(context, listen: false).loadStreak(token);
+      } else {
+        print("⚠️ Không tìm thấy token để load streak");
+      }
+
+      // ⭐ CHUYỂN TRANG
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const CategoryScreen()),
@@ -67,11 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 80),
 
             // 🐷 Ảnh con lợn tiết kiệm
-            Image.asset(
-              'assets/images/piggy.png',
-              width: 140,
-              height: 140,
-            ),
+            Image.asset('assets/images/piggy.png', width: 140, height: 140),
 
             const SizedBox(height: 20),
             const Text(
@@ -189,8 +199,10 @@ class _LoginScreenState extends State<LoginScreen> {
           hintText: hint,
           filled: true,
           fillColor: Colors.white,
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 14,
+            horizontal: 16,
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide.none,

@@ -1,10 +1,13 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'package:qlctfe/api/auth_service.dart';
 import 'package:qlctfe/api/category_service.dart';
 import 'package:qlctfe/api/notification_service.dart';
 import 'package:qlctfe/models/category_model.dart';
 import 'package:qlctfe/screens/ai/ai_predict_screen.dart';
+import 'package:qlctfe/screens/assistant_chat_screen.dart';
 import 'package:qlctfe/screens/budget_screen.dart';
 import 'package:qlctfe/screens/expense_dashboard_screen.dart';
 import 'package:qlctfe/screens/goal_screen.dart';
@@ -18,6 +21,8 @@ import 'package:qlctfe/screens/settings_screen.dart';
 import 'package:qlctfe/screens/transaction_form_screen.dart';
 import 'package:qlctfe/screens/transaction_history_screen.dart';
 import 'package:qlctfe/screens/wallet_screen.dart';
+
+import '../../core/services/streak_provider.dart';
 
 class CategoryScreen extends StatefulWidget {
   const CategoryScreen({Key? key}) : super(key: key);
@@ -75,9 +80,8 @@ class _CategoryScreenState extends State<CategoryScreen> {
     await _auth.logout();
     if (!mounted) return;
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text("🚪 Đã đăng xuất.")));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text("🚪 Đã đăng xuất.")));
 
     setState(() {});
   }
@@ -86,33 +90,84 @@ class _CategoryScreenState extends State<CategoryScreen> {
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
-      child: Scaffold(
-        backgroundColor: const Color(0xFFFCF8F3),
-        appBar: _buildAppBar(),
-        body: FutureBuilder<List<CategoryModel>>(
-          future: _categoriesFuture,
-          builder: (context, snap) {
-            if (snap.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(color: Colors.orangeAccent),
-              );
-            } else if (snap.hasError) {
-              return Center(child: Text("❌ Lỗi: ${snap.error}"));
-            }
+      child: Stack(
+        children: [
+          Scaffold(
+            backgroundColor: const Color(0xFFFCF8F3),
+            appBar: _buildAppBar(),
+            body: FutureBuilder<List<CategoryModel>>(
+              future: _categoriesFuture,
+              builder: (context, snap) {
+                if (snap.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: Colors.orangeAccent),
+                  );
+                } else if (snap.hasError) {
+                  return Center(child: Text("❌ Lỗi: ${snap.error}"));
+                }
 
-            final list = snap.data ?? [];
-            final expenses = list.where((c) => c.type == "expense").toList();
-            final incomes = list.where((c) => c.type == "income").toList();
+                final list = snap.data ?? [];
+                final expenses =
+                    list.where((c) => c.type == "expense").toList();
+                final incomes =
+                    list.where((c) => c.type == "income").toList();
 
-            return TabBarView(
-              children: [
-                _buildCategoryGrid(expenses),
-                _buildCategoryGrid(incomes),
-              ],
-            );
-          },
-        ),
-        bottomNavigationBar: _buildBottomButtons(),
+                return TabBarView(
+                  children: [
+                    _buildCategoryGrid(expenses),
+                    _buildCategoryGrid(incomes),
+                  ],
+                );
+              },
+            ),
+            bottomNavigationBar: _buildBottomButtons(),
+          ),
+
+          // ⭐⭐⭐ FLOATING ASSISTANT CHAT BUBBLE ⭐⭐⭐
+          Positioned(
+            right: 18,
+            bottom: 110,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const AssistantChatScreen(),
+                  ),
+                );
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeOut,
+                width: 65,
+                height: 65,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFF7B61FF),
+                      Color(0xFF9D4DFF),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.20),
+                      blurRadius: 10,
+                      offset: const Offset(0, 6),
+                    )
+                  ],
+                ),
+                child: const Icon(
+                  Icons.smart_toy_outlined,
+                  color: Colors.white,
+                  size: 34,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -130,6 +185,37 @@ class _CategoryScreenState extends State<CategoryScreen> {
       ),
       centerTitle: true,
       actions: [
+        Consumer<StreakProvider>(
+          builder: (context, streak, child) {
+            return GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context, "/streak-dashboard");
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(right: 12, top: 8),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.local_fire_department,
+                      color: Colors.orange.shade700,
+                      size: 30,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      "${streak.currentStreak}",
+                      style: TextStyle(
+                        color: Colors.orange.shade700,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+
         Stack(
           children: [
             IconButton(
@@ -172,6 +258,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
               ),
           ],
         ),
+
         IconButton(
           tooltip: "Cài đặt",
           icon: const Icon(Icons.settings),
@@ -182,6 +269,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
             );
           },
         ),
+
         IconButton(
           icon: const Icon(Icons.person),
           onPressed: () {
@@ -240,7 +328,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     MaterialPageRoute(builder: (_) => target),
                   );
                 }),
-
                 _menuItem(Icons.insert_chart, "Báo cáo tổng hợp", () {
                   Navigator.pop(sheetContext);
                   _requireLogin(
@@ -250,17 +337,13 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     ),
                   );
                 }),
-
                 _menuItem(Icons.auto_awesome, "AI dự đoán chi tiêu", () async {
                   Navigator.pop(sheetContext);
 
                   final profile = await _auth.getProfile();
                   final userId = profile?["id"];
 
-                  if (userId == null) {
-                    print("❌ Không lấy được userId");
-                    return;
-                  }
+                  if (userId == null) return;
 
                   _requireLogin(() {
                     Navigator.push(
@@ -271,19 +354,15 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     );
                   });
                 }),
-
                 _menuItem(Icons.autorenew, "Giao dịch định kỳ", () {
                   Navigator.pop(sheetContext);
                   _requireLogin(
                     () => Navigator.push(
                       parentContext,
-                      MaterialPageRoute(
-                        builder: (_) => const RecurringScreen(),
-                      ),
+                      MaterialPageRoute(builder: (_) => const RecurringScreen()),
                     ),
                   );
                 }),
-
                 _menuItem(Icons.history, "Lịch sử giao dịch", () {
                   Navigator.pop(sheetContext);
                   _requireLogin(
@@ -295,7 +374,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     ),
                   );
                 }),
-
                 _menuItem(Icons.account_balance_wallet, "Ví", () {
                   Navigator.pop(sheetContext);
                   _requireLogin(
@@ -305,7 +383,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     ),
                   );
                 }),
-
                 _menuItem(Icons.flag_outlined, "Mục tiêu", () {
                   Navigator.pop(sheetContext);
                   _requireLogin(
@@ -315,7 +392,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     ),
                   );
                 }),
-
                 _menuItem(Icons.account_balance, "Ngân sách", () {
                   Navigator.pop(sheetContext);
                   _requireLogin(
@@ -325,7 +401,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     ),
                   );
                 }),
-
                 const Divider(height: 25),
                 _menuItem(Icons.logout, "Đăng xuất", () async {
                   Navigator.pop(sheetContext);

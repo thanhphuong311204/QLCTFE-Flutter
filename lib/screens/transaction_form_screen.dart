@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:qlctfe/api/auth_service.dart';
 import 'package:qlctfe/api/notification_service.dart';
+import 'package:qlctfe/core/services/streak_provider.dart';
 import '../api/transaction_service.dart';
 import '../api/wallet_service.dart';
 import '../api/ai_service.dart';
@@ -44,7 +47,6 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
 
   DateTime _selectedDate = DateTime.now();
 
-  /// 🔥 DANH SÁCH GỢI Ý TỪ AI
   List<String> _aiSuggestions = [];
   bool _loadingAI = false;
 
@@ -64,7 +66,6 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
     }
   }
 
-  // ---------------------- LOAD CATEGORY -----------------------
   Future<void> _loadCategories() async {
     try {
       final cats = await _categoryService.getCategories();
@@ -72,7 +73,6 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
     } catch (_) {}
   }
 
-  // ---------------------- LOAD WALLETS ------------------------
   Future<void> _loadWallets() async {
     try {
       final wallets = await _walletService.getWallets();
@@ -87,7 +87,6 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
     }
   }
 
-  // ---------------------- MATCH CATEGORY -----------------------
   CategoryModel _smartMatchCategory(String name) {
     final lower = name.toLowerCase();
 
@@ -97,7 +96,6 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
     );
   }
 
-  // ---------------------- CALL AI => MULTI SUGGESTIONS ---------
   Future<void> _runAISuggestion(String text) async {
     if (text.trim().length < 2) return;
 
@@ -118,7 +116,6 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
     setState(() => _loadingAI = false);
   }
 
-  // ---------------------- SUBMIT -------------------------------
   Future<void> _submitTransaction() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -158,7 +155,16 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
           widget.transaction!.type == "expense",
         );
       }
+
       _notificationService.getNotifications();
+
+      final token = await AuthService().getToken();
+
+      if (token != null && token.isNotEmpty) {
+        Provider.of<StreakProvider>(context, listen: false).loadStreak(token);
+      } else {
+        print("⚠️ Không tìm thấy token để load streak");
+      }
 
       Navigator.pop(context, "refresh");
     } catch (e) {
@@ -168,7 +174,6 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
     }
   }
 
-  // ---------------------- UI -----------------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -184,26 +189,55 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
           key: _formKey,
           child: ListView(
             children: [
-              // Số tiền
               TextFormField(
                 controller: _amountController,
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: "Số tiền"),
+                decoration: InputDecoration(
+                  labelText: "Số tiền",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: Colors.blueAccent,
+                      width: 1.5,
+                    ),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                ),
                 validator: (v) => v!.isEmpty ? "Không được để trống" : null,
               ),
 
               SizedBox(height: 16),
 
-              // Ghi chú
               TextFormField(
                 controller: _noteController,
-                decoration: InputDecoration(labelText: "Ghi chú"),
+                decoration: InputDecoration(
+                  labelText: "Ghi chú",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: Colors.blueAccent,
+                      width: 1.5,
+                    ),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                ),
                 onChanged: _runAISuggestion,
               ),
 
               SizedBox(height: 12),
 
-              // -------------------- MULTI SUGGESTION UI -------------------
               if (_loadingAI)
                 Text(
                   "⏳ AI đang phân tích...",
@@ -216,14 +250,15 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
                     return ChoiceChip(
                       label: Text(s),
                       selected: false,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                       onSelected: (_) {
                         final matched = _smartMatchCategory(s);
-
                         setState(() {
                           widget.categoryId = matched.categoryId;
                           widget.categoryName = matched.categoryName;
                         });
-
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text("✔ Đã chọn: ${matched.categoryName}"),
@@ -236,7 +271,6 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
 
               SizedBox(height: 16),
 
-              // Ngày
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -262,10 +296,25 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
 
               SizedBox(height: 16),
 
-              // Ví
               DropdownButtonFormField<Wallet>(
                 value: _selectedWallet,
-                decoration: InputDecoration(labelText: "Chọn ví"),
+                decoration: InputDecoration(
+                  labelText: "Chọn ví",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: Colors.blueAccent,
+                      width: 1.5,
+                    ),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                ),
                 items: _wallets.map((w) {
                   return DropdownMenuItem(
                     value: w,
@@ -277,7 +326,6 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
 
               SizedBox(height: 24),
 
-              // Submit button
               ElevatedButton(
                 onPressed: _submitTransaction,
                 style: ElevatedButton.styleFrom(
@@ -285,6 +333,9 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
                       ? Colors.redAccent
                       : Colors.green,
                   padding: EdgeInsets.all(16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 child: Text(
                   widget.transaction == null

@@ -84,13 +84,12 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // 🔴 Biểu đồ tròn hiển thị số tiền
                       SizedBox(
                         height: 270,
                         child: PieChart(
                           PieChartData(
                             sectionsSpace: 2,
-                            centerSpaceRadius: 0, // ✅ không donut
+                            centerSpaceRadius: 0, 
                             borderData: FlBorderData(show: false),
                             sections: _buildChartSections(
                               categoryTotals,

@@ -17,8 +17,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   Future<void> submit() async {
     if (newCtrl.text != confirmCtrl.text) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Mật khẩu không khớp")));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Mật khẩu không khớp")));
       return;
     }
 
@@ -28,7 +29,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     );
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(ok ? "Đổi mật khẩu thành công" : "Sai mật khẩu cũ")),
+      SnackBar(
+        content: Text(ok ? "Đổi mật khẩu thành công" : "Sai mật khẩu cũ"),
+      ),
     );
 
     if (ok) Navigator.pop(context);
@@ -40,37 +43,70 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       appBar: AppBar(
         title: const Text("Đổi mật khẩu"),
         backgroundColor: Colors.orange.shade200,
+        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             TextField(
               controller: oldCtrl,
               obscureText: true,
-              decoration: const InputDecoration(labelText: "Mật khẩu cũ"),
+              decoration: const InputDecoration(
+                labelText: "Mật khẩu cũ",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                ),
+              ),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: newCtrl,
               obscureText: true,
-              decoration: const InputDecoration(labelText: "Mật khẩu mới"),
+              decoration: const InputDecoration(
+                labelText: "Mật khẩu mới",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                ),
+              ),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: confirmCtrl,
               obscureText: true,
-              decoration: const InputDecoration(labelText: "Xác nhận mật khẩu"),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: submit,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                padding: const EdgeInsets.symmetric(vertical: 14),
+              decoration: const InputDecoration(
+                labelText: "Xác nhận mật khẩu",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                ),
               ),
-              child: const Text("Đổi mật khẩu",
-                  style: TextStyle(color: Colors.white)),
+            ),
+            const SizedBox(height: 30),
+
+            // ✅ Nút Đổi mật khẩu (bo góc, full width, đẹp hơn)
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: submit,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  elevation: 3,
+                  shadowColor: Colors.orangeAccent.withOpacity(0.4),
+                ),
+                child: const Text(
+                  "Đổi mật khẩu",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
             ),
           ],
         ),
